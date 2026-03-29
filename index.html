@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>易經六十四卦 — LINGPLUS Studio</title>
+<meta name="description" content="易經六十四卦完整查詢。卦辭、彖傳、象傳、爻辭、白話解釋，以及每日占卜指引。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Serif+TC:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F1EB;
+  --surface:rgba(255,255,255,0.85);
+  --border:rgba(0,0,0,0.07);
+  --border-md:rgba(0,0,0,0.13);
+  --text:#1C1917;
+  --text2:#6B6560;
+  --text3:#A8A299;
+  --primary:#1C1917;
+  --accent:#8B6A3E;
+  --radius:16px;
+  --radius-sm:8px;
+  --serif:'Noto Serif TC',serif;
+  --display:'DM Serif Display',serif;
+  --sans:'DM Sans','PingFang TC',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ── Orbs ── */
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;transition:all 2s ease}
+.orb-1{width:500px;height:500px;top:-180px;left:-180px;background:radial-gradient(circle,#8B6A3E,transparent 70%);opacity:.08;filter:blur(60px);animation:of1 20s ease-in-out infinite}
+.orb-2{width:400px;height:400px;bottom:-150px;right:-150px;background:radial-gradient(circle,#2F855A,transparent 70%);opacity:.07;filter:blur(70px);animation:of2 25s ease-in-out infinite}
+@keyframes of1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,20px)}}
+@keyframes of2{0%,100%{transform:translate(0,0)}50%{transform:translate(-25px,-30px)}}
+
+.page{position:relative;z-index:1}
+
+/* ── Topbar ── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(245,241,235,0.9);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-brand{display:flex;align-items:baseline;gap:8px}
+.topbar-logo{font-family:var(--display);font-size:17px;color:var(--text)}
+.topbar-sub{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+.topbar-nav{display:flex;gap:6px}
+.nav-btn{
+  font-size:12px;padding:5px 13px;border-radius:20px;
+  border:1px solid var(--border-md);background:transparent;
+  color:var(--text2);cursor:pointer;font-family:var(--sans);
+  transition:all .15s;
+}
+.nav-btn:hover{background:rgba(0,0,0,0.05)}
+.nav-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* ── Hero ── */
+.hero{
+  max-width:900px;margin:0 auto;
+  padding:4rem 2rem 2.5rem;
+  text-align:center;
+}
+.hero-eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;font-family:var(--sans)}
+.hero-title{font-family:var(--display);font-size:clamp(32px,6vw,52px);font-weight:400;line-height:1.1;margin-bottom:12px;color:var(--text)}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-sub{font-size:14px;color:var(--text2);line-height:1.8;max-width:480px;margin:0 auto 2rem}
+
+/* ── Search & filter ── */
+.search-wrap{max-width:900px;margin:0 auto 2rem;padding:0 2rem}
+.search-bar{
+  display:flex;align-items:center;gap:10px;
+  background:white;border:1px solid var(--border-md);
+  border-radius:50px;padding:10px 18px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.05);
+  margin-bottom:1rem;
+}
+.search-bar input{
+  flex:1;border:none;outline:none;font-size:14px;
+  font-family:var(--sans);color:var(--text);background:transparent;
+}
+.search-bar input::placeholder{color:var(--text3)}
+.search-icon{color:var(--text3);font-size:15px;flex-shrink:0}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{
+  font-size:11px;padding:4px 12px;border-radius:20px;
+  border:1px solid var(--border-md);background:rgba(255,255,255,0.6);
+  color:var(--text2);cursor:pointer;font-family:var(--sans);
+  transition:all .15s;white-space:nowrap;
+}
+.filter-btn:hover{background:white}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── Divination bar ── */
+.divination-bar{
+  max-width:900px;margin:0 auto 2.5rem;padding:0 2rem;
+}
+.div-card{
+  background:var(--surface);backdrop-filter:blur(12px);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.5rem 2rem;
+  display:flex;align-items:center;gap:1.5rem;
+  box-shadow:0 2px 20px rgba(0,0,0,0.04);
+}
+.div-icon{
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(139,106,62,0.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.div-text h3{font-family:var(--serif);font-size:15px;font-weight:500;margin-bottom:3px}
+.div-text p{font-size:12px;color:var(--text2);line-height:1.6}
+.div-btn{
+  margin-left:auto;flex-shrink:0;
+  height:40px;padding:0 20px;
+  background:var(--text);color:white;
+  border:none;border-radius:var(--radius-sm);
+  font-size:13px;font-family:var(--sans);font-weight:500;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+  letter-spacing:.03em;
+}
+.div-btn:hover{opacity:.85;transform:translateY(-1px)}
+
+/* ── Hexagram grid ── */
+.grid-wrap{max-width:900px;margin:0 auto;padding:0 2rem 4rem}
+.grid-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;font-family:var(--sans)}
+.hex-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:8px;
+}
+.hex-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:14px 12px;
+  cursor:pointer;transition:all .2s;
+  text-align:center;
+  backdrop-filter:blur(8px);
+}
+.hex-card:hover{
+  border-color:var(--border-md);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+  background:white;
+}
+.hex-symbol{font-size:28px;margin-bottom:6px;line-height:1;display:block}
+.hex-num{font-size:9px;color:var(--text3);letter-spacing:.08em;margin-bottom:3px;font-family:var(--sans)}
+.hex-name{font-family:var(--serif);font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px}
+.hex-name-en{font-size:9px;color:var(--text3);font-family:var(--sans);letter-spacing:.04em}
+.hex-nature{display:inline-block;font-size:8px;margin-top:5px;padding:2px 7px;border-radius:10px;font-family:var(--sans)}
+
+/* ── Detail Modal ── */
+#modal-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(28,25,23,0.7);backdrop-filter:blur(8px);
+  overflow-y:auto;padding:2rem 1rem;
+}
+#modal-overlay.show{display:flex;justify-content:center;align-items:flex-start}
+.modal{
+  background:#FAFAF7;border-radius:24px;
+  max-width:680px;width:100%;
+  box-shadow:0 24px 60px rgba(0,0,0,0.25);
+  animation:modalPop .3s cubic-bezier(0.34,1.56,0.64,1);
+  overflow:hidden;
+  position:relative;
+}
+@keyframes modalPop{from{transform:scale(0.93);opacity:0}to{transform:scale(1);opacity:1}}
+
+.modal-hero{
+  padding:2.5rem 2.5rem 2rem;
+  border-bottom:1px solid var(--border);
+  display:flex;gap:1.5rem;align-items:flex-start;
+  position:relative;
+}
+.modal-close{
+  position:absolute;top:1.5rem;right:1.5rem;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(0,0,0,0.06);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--text2);transition:all .15s;
+}
+.modal-close:hover{background:rgba(0,0,0,0.1);color:var(--text)}
+.modal-symbol-big{font-size:64px;line-height:1;flex-shrink:0}
+.modal-title-area{}
+.modal-num{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-family:var(--sans)}
+.modal-name{font-family:var(--display);font-size:32px;font-weight:400;color:var(--text);margin-bottom:4px}
+.modal-name-en{font-family:var(--display);font-size:16px;font-style:italic;color:var(--accent)}
+.modal-trigrams{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.trigram-badge{
+  font-size:11px;padding:3px 10px;border-radius:20px;
+  background:rgba(139,106,62,0.08);color:var(--accent);
+  border:1px solid rgba(139,106,62,0.2);font-family:var(--sans);
+}
+
+.modal-body{padding:0 2.5rem 2.5rem}
+
+.modal-section{padding:1.5rem 0;border-bottom:1px solid var(--border)}
+.modal-section:last-child{border-bottom:none}
+.section-label{
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text3);font-family:var(--sans);font-weight:600;
+  margin-bottom:10px;
+}
+.section-text{
+  font-family:var(--serif);font-size:14px;color:var(--text);
+  line-height:2;font-weight:400;
+}
+.section-sub{
+  font-size:13px;color:var(--text2);line-height:1.8;
+  margin-top:8px;font-family:var(--sans);
+}
+
+.yao-list{display:flex;flex-direction:column;gap:0}
+.yao-row{
+  display:grid;grid-template-columns:60px 1fr;
+  gap:0 12px;padding:1rem 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.yao-row:last-child{border-bottom:none}
+.yao-label{
+  font-size:11px;font-weight:600;color:var(--accent);
+  font-family:var(--sans);letter-spacing:.04em;
+  padding-top:1px;
+}
+.yao-content{}
+.yao-ci{font-family:var(--serif);font-size:13px;color:var(--text);line-height:1.8;margin-bottom:4px}
+.yao-meaning{font-size:12px;color:var(--text2);line-height:1.7;font-family:var(--sans)}
+
+.jiezi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.jiezi-item{
+  background:rgba(139,106,62,0.05);border:1px solid rgba(139,106,62,0.1);
+  border-radius:var(--radius-sm);padding:10px 12px;
+}
+.jiezi-char{font-family:var(--serif);font-size:20px;color:var(--text);margin-bottom:4px}
+.jiezi-pinyin{font-size:10px;color:var(--text3);font-family:var(--sans);margin-bottom:4px}
+.jiezi-def{font-size:11px;color:var(--text2);line-height:1.6;font-family:var(--sans)}
+
+/* ── Divination Modal ── */
+#div-modal{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(28,25,23,0.85);backdrop-filter:blur(12px);
+  justify-content:center;align-items:center;padding:2rem;
+}
+#div-modal.show{display:flex}
+.div-modal-box{
+  background:#FAFAF7;border-radius:24px;
+  max-width:480px;width:100%;padding:2.5rem;
+  text-align:center;
+  animation:modalPop .35s cubic-bezier(0.34,1.56,0.64,1);
+  position:relative;
+}
+.div-modal-close{
+  position:absolute;top:1.25rem;right:1.25rem;
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(0,0,0,0.06);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--text2);
+}
+.div-stage{display:none}
+.div-stage.active{display:block}
+
+.div-question-area{margin-bottom:2rem}
+.div-q-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);margin-bottom:12px}
+.div-q-input{
+  width:100%;border:none;border-bottom:1.5px solid var(--border-md);
+  background:transparent;font-family:var(--serif);font-size:16px;
+  color:var(--text);padding:8px 0;outline:none;text-align:center;
+  transition:border-color .2s;
+}
+.div-q-input:focus{border-color:var(--accent)}
+.div-q-input::placeholder{color:var(--text3);font-size:14px}
+
+.coins-wrap{display:flex;justify-content:center;gap:16px;margin:1.5rem 0}
+.coin{
+  width:56px;height:56px;border-radius:50%;
+  border:2px solid var(--border-md);background:white;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;cursor:pointer;transition:all .2s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  user-select:none;
+}
+.coin:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(0,0,0,0.12)}
+.coin.heads{background:#FFF8E7;border-color:rgba(139,106,62,0.3)}
+.coin.tails{background:#F0F4FF;border-color:rgba(43,108,176,0.3)}
+.coin.tossing{animation:coinFlip .4s ease}
+@keyframes coinFlip{0%,100%{transform:scaleY(1)}50%{transform:scaleY(0.1)}}
+
+.toss-btn{
+  width:100%;height:48px;background:var(--text);color:white;
+  border:none;border-radius:var(--radius-sm);
+  font-size:14px;font-family:var(--sans);font-weight:500;
+  cursor:pointer;transition:all .15s;letter-spacing:.04em;
+  margin-top:1rem;
+}
+.toss-btn:hover{opacity:.85}
+.toss-btn:disabled{opacity:.4;cursor:not-allowed}
+
+.yao-progress{display:flex;flex-direction:column;gap:6px;margin:1rem 0;align-items:center}
+.yao-line{display:flex;gap:4px;align-items:center}
+.yao-line-label{font-size:10px;color:var(--text3);font-family:var(--sans);width:30px;text-align:right}
+.yao-line-bar{
+  height:8px;border-radius:4px;
+  transition:all .3s;
+}
+.yao-line-bar.yang{width:80px;background:var(--text)}
+.yao-line-bar.yin{width:36px;background:var(--text);display:flex;gap:8px}
+.yao-line-bar.yin::after{content:'';width:36px;height:8px;background:var(--text);border-radius:4px;display:block}
+.yao-line-bar.empty{width:80px;background:rgba(0,0,0,0.08)}
+
+.div-result-symbol{font-size:72px;margin:1rem 0;animation:fadeIn .5s ease}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+.div-result-name{font-family:var(--display);font-size:28px;color:var(--text);margin-bottom:6px}
+.div-result-meaning{font-family:var(--serif);font-size:14px;color:var(--text2);line-height:1.9;margin:1rem 0}
+.div-view-btn{
+  width:100%;height:44px;background:var(--accent);color:white;
+  border:none;border-radius:var(--radius-sm);
+  font-size:13px;font-family:var(--sans);font-weight:500;
+  cursor:pointer;letter-spacing:.04em;transition:all .15s;margin-top:0.5rem;
+}
+.div-view-btn:hover{opacity:.88}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:2rem;font-size:12px;color:var(--text3);position:relative;z-index:1}
+
+@media(max-width:600px){
+  .topbar{padding:0 1rem}
+  .hero{padding:2.5rem 1.25rem 1.5rem}
+  .search-wrap,.grid-wrap,.divination-bar{padding:0 1.25rem}
+  .hex-grid{grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
+  .modal-hero{flex-direction:column;gap:1rem;padding:1.75rem 1.5rem 1.5rem}
+  .modal-body{padding:0 1.5rem 1.5rem}
+  .jiezi-grid{grid-template-columns:1fr}
+  .div-card{flex-wrap:wrap}
+  .div-btn{width:100%;margin-left:0;margin-top:0.5rem}
+  .topbar-nav{display:none}
+}
+</style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page">
+  <nav class="topbar">
+    <div class="topbar-brand">
+      <span class="topbar-logo">LINGPLUS</span>
+      <span class="topbar-sub">易經六十四卦</span>
+    </div>
+    <div class="topbar-nav">
+      <button class="nav-btn active" onclick="setView('browse')">卦象總覽</button>
+      <button class="nav-btn" onclick="openDivModal()">起卦占卜</button>
+      <a href="https://lingplusstudio.github.io/wuxing-ootd/" style="text-decoration:none">
+        <button class="nav-btn">五行穿搭 →</button>
+      </a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-eyebrow">LINGPLUS Studio · 易學系列</div>
+    <h1 class="hero-title">易經<em>六十四卦</em></h1>
+    <p class="hero-sub">卦辭、彖傳、象傳、爻辭、白話詮釋，以及每日起卦占卜。讓古老智慧成為現代生活的參考。</p>
+  </div>
+
+  <div class="search-wrap">
+    <div class="search-bar">
+      <span class="search-icon">◎</span>
+      <input type="text" id="search-input" placeholder="搜尋卦名、關鍵字……" oninput="filterHex(this.value)">
+    </div>
+    <div class="filter-row" id="filter-row"></div>
+  </div>
+
+  <div class="divination-bar">
+    <div class="div-card">
+      <div class="div-icon">☰</div>
+      <div class="div-text">
+        <h3>今日起卦</h3>
+        <p>以三枚銅錢六次成卦，獲取今日指引</p>
+      </div>
+      <button class="div-btn" onclick="openDivModal()">立即起卦</button>
+    </div>
+  </div>
+
+  <div class="grid-wrap">
+    <div class="grid-label" id="grid-label">全部六十四卦</div>
+    <div class="hex-grid" id="hex-grid"></div>
+  </div>
+
+  <div class="footer">Powered by <strong>LINGPLUS Studio</strong> · 易學系列</div>
+</div>
+
+<!-- Detail Modal -->
+<div id="modal-overlay" onclick="closeModalOnBg(event)">
+  <div class="modal" id="detail-modal">
+    <div class="modal-hero">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-symbol-big" id="m-symbol"></div>
+      <div class="modal-title-area">
+        <div class="modal-num" id="m-num"></div>
+        <div class="modal-name" id="m-name"></div>
+        <div class="modal-name-en" id="m-name-en"></div>
+        <div class="modal-trigrams" id="m-trigrams"></div>
+      </div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Divination Modal -->
+<div id="div-modal">
+  <div class="div-modal-box">
+    <button class="div-modal-close" onclick="closeDivModal()">✕</button>
+
+    <div class="div-stage active" id="div-stage-1">
+      <div style="font-family:var(--display);font-size:22px;margin-bottom:8px">起卦占卜</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:1.5rem;line-height:1.7">靜心，心中默想你的問題，然後開始起卦。</p>
+      <div class="div-question-area">
+        <div class="div-q-label">你的問題（選填）</div>
+        <input class="div-q-input" id="div-question" placeholder="此刻心中所想……" maxlength="60">
+      </div>
+      <button class="toss-btn" onclick="startDivination()">開始起卦</button>
+    </div>
+
+    <div class="div-stage" id="div-stage-2">
+      <div style="font-family:var(--serif);font-size:15px;margin-bottom:4px" id="div-yao-title">第一爻</div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:1.25rem">點擊銅錢搖動，三次為一爻</p>
+      <div class="coins-wrap" id="coins-wrap">
+        <div class="coin" id="coin-0" onclick="tossCoin(0)">●</div>
+        <div class="coin" id="coin-1" onclick="tossCoin(1)">●</div>
+        <div class="coin" id="coin-2" onclick="tossCoin(2)">●</div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem" id="coin-result-text">點擊銅錢投擲</div>
+      <div class="yao-progress" id="yao-progress"></div>
+      <button class="toss-btn" id="confirm-yao-btn" onclick="confirmYao()" disabled>確認此爻</button>
+    </div>
+
+    <div class="div-stage" id="div-stage-3">
+      <div class="div-result-symbol" id="div-result-symbol"></div>
+      <div class="div-result-name" id="div-result-name"></div>
+      <div class="div-result-meaning" id="div-result-meaning"></div>
+      <button class="div-view-btn" id="div-view-full" onclick="viewFullFromDiv()">查看完整卦義</button>
+      <button class="toss-btn" onclick="resetDiv()" style="background:transparent;color:var(--text2);border:1px solid var(--border-md);margin-top:8px">重新起卦</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ 六十四卦完整資料 ═══ */
+const HEXAGRAMS = [
+  {
+    num:1, name:"乾", nameEn:"The Creative", symbol:"䷀",
+    upper:"乾（天）", lower:"乾（天）",
+    nature:"大吉", natureBg:"#f0fff4", natureColor:"#276749",
+    keywords:["剛健","創造","天道","君子"],
+    gua:"元亨利貞。",
+    guaMeaning:"大吉大利，貞正之道。",
+    tuan:"大哉乾元，萬物資始，乃統天。雲行雨施，品物流形。大明終始，六位時成，時乘六龍以御天。乾道變化，各正性命，保合大和，乃利貞。首出庶物，萬國咸寧。",
+    xiang:"天行健，君子以自強不息。",
+    yao:[
+      {name:"初九",ci:"潛龍，勿用。",meaning:"陽氣潛藏，時機未到，君子應韜光養晦，靜待時機。"},
+      {name:"九二",ci:"見龍在田，利見大人。",meaning:"龍已出現於地上，有利於出見有德之大人，可以有所作為。"},
+      {name:"九三",ci:"君子終日乾乾，夕惕若，厲，無咎。",meaning:"君子整日奮發努力，夜晚也保持謹慎，雖處艱難，但無過失。"},
+      {name:"九四",ci:"或躍在淵，無咎。",meaning:"或躍起或潛淵，順應時機，無可責備。"},
+      {name:"九五",ci:"飛龍在天，利見大人。",meaning:"龍飛騰於天際，有利於出見大人，為最吉之爻位。"},
+      {name:"上九",ci:"亢龍，有悔。",meaning:"龍飛得太高，物極必反，居高位而驕亢則有悔恨。"},
+      {name:"用九",ci:"見群龍無首，吉。",meaning:"眾龍皆無首領，天下歸心，是為吉祥。"}
+    ],
+    jiezi:[
+      {char:"乾",pinyin:"qián",def:"天，純陽之卦，象徵剛健、進取、創造。"},
+      {char:"元",pinyin:"yuán",def:"大、始也，萬物之本原。"},
+      {char:"亨",pinyin:"hēng",def:"通達、順利也。"},
+      {char:"貞",pinyin:"zhēn",def:"正固、占問也，守正道而固守之。"}
+    ]
+  },
+  {
+    num:2, name:"坤", nameEn:"The Receptive", symbol:"䷁",
+    upper:"坤（地）", lower:"坤（地）",
+    nature:"大吉", natureBg:"#f0fff4", natureColor:"#276749",
+    keywords:["柔順","包容","大地","臣道"],
+    gua:"元亨，利牝馬之貞。君子有攸往，先迷後得主，利。西南得朋，東北喪朋。安貞吉。",
+    guaMeaning:"大吉大利，宜守柔順之道。君子若有所往，初時迷失，後終得主，有利。往西南可得朋友，往東北則失朋友，安於正道則吉。",
+    tuan:"至哉坤元，萬物資生，乃順承天。坤厚載物，德合無疆。含弘光大，品物咸亨。",
+    xiang:"地勢坤，君子以厚德載物。",
+    yao:[
+      {name:"初六",ci:"履霜，堅冰至。",meaning:"腳踩霜雪，知道堅冰將至。小惡若不加以制止，必然積累成大患。"},
+      {name:"六二",ci:"直方大，不習無不利。",meaning:"正直、方正、廣大，不需刻意學習也能無不利。"},
+      {name:"六三",ci:"含章可貞，或從王事，無成有終。",meaning:"含蓄文采，可守正，若輔佐君王，雖無功於己，但能善終。"},
+      {name:"六四",ci:"括囊，無咎無譽。",meaning:"紮緊袋口，沉默謹慎，既無過失也無聲譽。"},
+      {name:"六五",ci:"黃裳，元吉。",meaning:"穿著黃色裙裳，大為吉利。居中而美，謙遜處事。"},
+      {name:"上六",ci:"龍戰於野，其血玄黃。",meaning:"龍在原野廝殺，血流成河。陰極而爭，兩敗俱傷。"}
+    ],
+    jiezi:[
+      {char:"坤",pinyin:"kūn",def:"地，純陰之卦，象徵柔順、包容、大地之德。"},
+      {char:"牝",pinyin:"pìn",def:"雌性動物，此指母馬，象徵柔順之德。"},
+      {char:"霜",pinyin:"shuāng",def:"霜凍，陰氣之象，預示更深寒氣之到來。"},
+      {char:"裳",pinyin:"cháng",def:"下裳、裙，黃色居中，象徵謙遜守中之德。"}
+    ]
+  },
+  {
+    num:3, name:"屯", nameEn:"Difficulty at the Beginning", symbol:"䷂",
+    upper:"坎（水）", lower:"震（雷）",
+    nature:"宜守", natureBg:"#fff8e1", natureColor:"#b7791f",
+    keywords:["初始","困難","生長","謹慎"],
+    gua:"元亨，利貞，勿用有攸往，利建侯。",
+    guaMeaning:"大吉，利於守正，不宜輕舉妄動，利於封建諸侯。",
+    tuan:"屯，剛柔始交而難生，動乎險中，大亨貞。",
+    xiang:"雲雷，屯；君子以經綸。",
+    yao:[
+      {name:"初九",ci:"磐桓，利居貞，利建侯。",meaning:"徘徊不進，宜安居守正，利於立侯建業。"},
+      {name:"六二",ci:"屯如邅如，乘馬班如。匪寇婚媾，女子貞不字，十年乃字。",meaning:"困難徘徊，騎馬盤旋，非為強寇，乃為求婚，女子守貞不嫁，十年後方嫁。"},
+      {name:"六三",ci:"即鹿無虞，惟入於林中，君子幾不如舍，往吝。",meaning:"追鹿而無虞官引導，只是陷入林中，君子寧可放棄，冒然前往有悔。"},
+      {name:"六四",ci:"乘馬班如，求婚媾，往吉，無不利。",meaning:"騎馬徘徊，前往求婚，此去吉祥，無不利。"},
+      {name:"九五",ci:"屯其膏，小貞吉，大貞凶。",meaning:"恩澤被阻難施，小事守正則吉，大事則凶。"},
+      {name:"上六",ci:"乘馬班如，泣血漣如。",meaning:"騎馬徘徊，哭泣流血，處境極為艱難。"}
+    ],
+    jiezi:[
+      {char:"屯",pinyin:"zhūn",def:"難也，草木初生，破土而出之艱難。"},
+      {char:"磐",pinyin:"pán",def:"大石也，磐桓即猶豫不定之貌。"},
+      {char:"邅",pinyin:"zhān",def:"難行之貌，轉徙不前。"},
+      {char:"膏",pinyin:"gāo",def:"肥美之物，此指恩惠、澤被之意。"}
+    ]
+  },
+  {
+    num:4, name:"蒙", nameEn:"Youthful Folly", symbol:"䷃",
+    upper:"艮（山）", lower:"坎（水）",
+    nature:"宜學", natureBg:"#e3f0ff", natureColor:"#2b6cb0",
+    keywords:["啟蒙","教育","謙遜","求知"],
+    gua:"亨。匪我求童蒙，童蒙求我。初筮告，再三瀆，瀆則不告。利貞。",
+    guaMeaning:"通達。不是我去求教蒙童，而是蒙童來求我啟蒙。第一次占問可以告知，再三追問則是褻瀆，褻瀆則不告。利於守正。",
+    tuan:"蒙，山下有險，險而止，蒙。蒙亨，以亨行，時中也。",
+    xiang:"山下出泉，蒙；君子以果行育德。",
+    yao:[
+      {name:"初六",ci:"發蒙，利用刑人，用說桎梏，以往吝。",meaning:"啟發蒙昧，宜用刑罰示範，解除桎梏約束，但一味嚴刑則有悔。"},
+      {name:"九二",ci:"包蒙，吉；納婦，吉；子克家。",meaning:"包容蒙昧則吉，納娶妻子則吉，子弟能治理家業。"},
+      {name:"六三",ci:"勿用取女，見金夫，不有躬，無攸利。",meaning:"不宜娶此女，她見財忘義，失去節操，無所利益。"},
+      {name:"六四",ci:"困蒙，吝。",meaning:"沉陷於蒙昧之中，有所遺憾。"},
+      {name:"六五",ci:"童蒙，吉。",meaning:"像蒙童一樣謙遜求學，吉祥。"},
+      {name:"上九",ci:"擊蒙，不利為寇，利禦寇。",meaning:"懲治蒙昧，不利於作強盜去侵犯，有利於抵禦外侮。"}
+    ],
+    jiezi:[
+      {char:"蒙",pinyin:"méng",def:"覆蓋、昏暗也，引申為蒙昧、啟蒙之義。"},
+      {char:"筮",pinyin:"shì",def:"占問也，以蓍草占卜。"},
+      {char:"瀆",pinyin:"dú",def:"輕慢、褻瀆也，不恭敬之態。"},
+      {char:"桎梏",pinyin:"zhì gù",def:"腳鐐手銬，比喻約束、束縛之物。"}
+    ]
+  },
+  {
+    num:5, name:"需", nameEn:"Waiting", symbol:"䷄",
+    upper:"坎（水）", lower:"乾（天）",
+    nature:"宜等", natureBg:"#fff8e1", natureColor:"#b7791f",
+    keywords:["等待","時機","雨水","需求"],
+    gua:"有孚，光亨，貞吉。利涉大川。",
+    guaMeaning:"有誠信，光明亨通，守正則吉。利於渡越大河，勇於前行。",
+    tuan:"需，須也。險在前也，剛健而不陷，其義不困窮矣。",
+    xiang:"雲上於天，需；君子以飲食宴樂。",
+    yao:[
+      {name:"初九",ci:"需於郊，利用恆，無咎。",meaning:"在郊野等待，持之以恆則無過失。"},
+      {name:"九二",ci:"需於沙，小有言，終吉。",meaning:"在沙地等待，雖有些閒言，最終吉祥。"},
+      {name:"九三",ci:"需於泥，致寇至。",meaning:"在泥濘中等待，招致盜寇到來。"},
+      {name:"六四",ci:"需於血，出自穴。",meaning:"在血泊中等待，最終從困境中脫出。"},
+      {name:"九五",ci:"需於酒食，貞吉。",meaning:"在酒食中等待，守正則吉。"},
+      {name:"上六",ci:"入於穴，有不速之客三人來，敬之終吉。",meaning:"進入穴中，有三位不速之客到來，以禮相待則終吉。"}
+    ],
+    jiezi:[
+      {char:"需",pinyin:"xū",def:"等待、需要也，雲在天上，待雨而降之象。"},
+      {char:"孚",pinyin:"fú",def:"誠信也，鳥孵卵之形，引申為誠實可信。"},
+      {char:"郊",pinyin:"jiāo",def:"城邑之外的地方，郊野。"},
+      {char:"寇",pinyin:"kòu",def:"盜賊、敵寇，外來之侵害。"}
+    ]
+  },
+  {
+    num:6, name:"訟", nameEn:"Conflict", symbol:"䷅",
+    upper:"乾（天）", lower:"坎（水）",
+    nature:"宜慎", natureBg:"#fff5f5", natureColor:"#9b1b30",
+    keywords:["爭訟","糾紛","謹慎","和解"],
+    gua:"有孚，窒惕，中吉，終凶。利見大人，不利涉大川。",
+    guaMeaning:"有誠信但被阻塞而警惕，中途收手則吉，堅持到底則凶。利於見大人調解，不利於冒險涉越大河。",
+    tuan:"訟，上剛下險，險而健，訟。訟有孚，窒惕中吉，剛來而得中也。",
+    xiang:"天與水違行，訟；君子以作事謀始。",
+    yao:[
+      {name:"初六",ci:"不永所事，小有言，終吉。",meaning:"不長期糾纏訴訟，雖有些閒言，最終吉祥。"},
+      {name:"九二",ci:"不克訟，歸而逋，其邑人三百戶，無眚。",meaning:"打官司打不贏，退回逃避，其邑民三百戶，沒有災禍。"},
+      {name:"六三",ci:"食舊德，貞厲，終吉。或從王事，無成。",meaning:"依靠舊有恩德，守正雖危，終究吉祥。即使輔佐王事，也無功勞。"},
+      {name:"九四",ci:"不克訟，復即命，渝，安貞吉。",meaning:"打官司打不贏，返回聽從命令，改變態度，安守正道則吉。"},
+      {name:"九五",ci:"訟，元吉。",meaning:"訴訟得到公正裁決，大為吉祥。"},
+      {name:"上九",ci:"或錫之鞶帶，終朝三褫之。",meaning:"或許被賜予大帶，但一天之中三次被剝奪，爭訟之終無益。"}
+    ],
+    jiezi:[
+      {char:"訟",pinyin:"sòng",def:"爭辯、訴訟也，以言語相爭之義。"},
+      {char:"窒",pinyin:"zhì",def:"阻塞、窒礙，難以通達之貌。"},
+      {char:"逋",pinyin:"bū",def:"逃亡、逃跑，躲避之義。"},
+      {char:"褫",pinyin:"chǐ",def:"剝奪、取消，奪去衣物之義。"}
+    ]
+  },
+  {
+    num:7, name:"師", nameEn:"The Army", symbol:"䷆",
+    upper:"坤（地）", lower:"坎（水）",
+    nature:"宜守", natureBg:"#fff8e1", natureColor:"#b7791f",
+    keywords:["軍事","紀律","領導","眾人"],
+    gua:"貞，丈人，吉，無咎。",
+    guaMeaning:"守正，由德高望重的長者統帥，則吉，無過失。",
+    tuan:"師，眾也。貞正也，能以眾正，可以王矣。",
+    xiang:"地中有水，師；君子以容民畜眾。",
+    yao:[
+      {name:"初六",ci:"師出以律，否臧凶。",meaning:"出師行軍要有嚴明紀律，否則雖善意也會招凶。"},
+      {name:"九二",ci:"在師中，吉，無咎，王三錫命。",meaning:"身處軍中掌握中樞，吉祥無過，王者三次頒賜命令褒獎。"},
+      {name:"六三",ci:"師或輿尸，凶。",meaning:"軍隊或許載著屍體而歸，凶險。"},
+      {name:"六四",ci:"師左次，無咎。",meaning:"軍隊向左退卻紮營，無過失。"},
+      {name:"六五",ci:"田有禽，利執言，無咎。長子帥師，弟子輿尸，貞凶。",meaning:"田野有禽獸，出師有名有利，長子統帥軍隊則吉，讓次子帶兵則凶。"},
+      {name:"上六",ci:"大君有命，開國承家，小人勿用。",meaning:"大君頒布命令，開邦建國、繼承家業，但小人不可任用。"}
+    ],
+    jiezi:[
+      {char:"師",pinyin:"shī",def:"軍隊、眾多，引申為統率眾人。"},
+      {char:"律",pinyin:"lǜ",def:"法律、紀律，規範行為之準則。"},
+      {char:"輿",pinyin:"yú",def:"車輛，引申為承載、眾多之義。"},
+      {char:"錫",pinyin:"xī",def:"賜予、給予，君主賞賜之義。"}
+    ]
+  },
+  {
+    num:8, name:"比", nameEn:"Holding Together", symbol:"䷇",
+    upper:"坎（水）", lower:"坤（地）",
+    nature:"吉", natureBg:"#f0fff4", natureColor:"#276749",
+    keywords:["親密","聯合","輔助","歸附"],
+    gua:"吉。原筮，元永貞，無咎。不寧方來，後夫凶。",
+    guaMeaning:"吉祥。再次占問，若能長久守正則無過。不安定的各方前來歸附，若遲來者則有凶。",
+    tuan:"比，吉也，比，輔也，下順從也。原筮，元永貞，無咎，以剛中也。",
+    xiang:"地上有水，比；先王以建萬國，親諸侯。",
+    yao:[
+      {name:"初六",ci:"有孚比之，無咎。有孚盈缶，終來有他，吉。",meaning:"以誠信相親，無過失。誠信充滿如缶，終究會有他方歸附，吉。"},
+      {name:"六二",ci:"比之自內，貞吉。",meaning:"從內部去親近，守正則吉。"},
+      {name:"六三",ci:"比之匪人。",meaning:"與不相宜之人相親，不吉。"},
+      {name:"六四",ci:"外比之，貞吉。",meaning:"向外尋求親近，守正則吉。"},
+      {name:"九五",ci:"顯比，王用三驅，失前禽，邑人不誡，吉。",meaning:"光明地與人相親，王者三面驅獵，讓獵物從前方逃走，百姓不必警戒，吉。"},
+      {name:"上六",ci:"比之無首，凶。",meaning:"親附沒有首領，凶險。"}
+    ],
+    jiezi:[
+      {char:"比",pinyin:"bǐ",def:"親近、輔助，相互依附之義。"},
+      {char:"缶",pinyin:"fǒu",def:"陶製器皿，用以盛水或釀酒。"},
+      {char:"驅",pinyin:"qū",def:"驅趕，三驅即三面圍獵，留一面讓獵物逃生。"},
+      {char:"誡",pinyin:"jiè",def:"警戒、告誡，此指不需要戒備。"}
+    ]
+  },
+  {
+    num:9, name:"小畜", nameEn:"The Taming Power of the Small", symbol:"䷈",
+    upper:"巽（風）", lower:"乾（天）",
+    nature:"宜待", natureBg:"#fff8e1", natureColor:"#b7791f",
+    keywords:["積蓄","柔和","蓄養","稍待"],
+    gua:"亨。密雲不雨，自我西郊。",
+    guaMeaning:"通達。濃雲密佈卻不下雨，雲從我西郊而來。",
+    tuan:"小畜，柔得位而上下應之，曰小畜。健而巽，剛中而志行，乃亨。",
+    xiang:"風行天上，小畜；君子以懿文德。",
+    yao:[
+      {name:"初九",ci:"復自道，何其咎？吉。",meaning:"回歸正道，有何過失？吉祥。"},
+      {name:"九二",ci:"牽復，吉。",meaning:"被牽引而回歸，吉祥。"},
+      {name:"九三",ci:"輿說輻，夫妻反目。",meaning:"車輪脫落車輻，夫妻之間翻臉反目。"},
+      {name:"六四",ci:"有孚，血去惕出，無咎。",meaning:"有誠信，憂慮消除，驚惕消散，無過失。"},
+      {name:"九五",ci:"有孚攣如，富以其鄰。",meaning:"以誠信相連結，富裕而能與鄰里共享。"},
+      {name:"上九",ci:"既雨既處，尚德載，婦貞厲，月幾望，君子征凶。",meaning:"已經下雨已安定，崇尚德行而承載，婦人守正雖有危，月近望時，君子出征則凶。"}
+    ],
+    jiezi:[
+      {char:"畜",pinyin:"xù",def:"蓄積、養育，聚集積蓄之義。"},
+      {char:"攣",pinyin:"luán",def:"相連、牽連，緊密相連之貌。"},
+      {char:"輻",pinyin:"fú",def:"車輪上的輻條，連接輪轂與輪圈之木條。"},
+      {char:"望",pinyin:"wàng",def:"農曆十五月圓之日，月望即月圓。"}
+    ]
+  },
+  {
+    num:10, name:"履", nameEn:"Treading", symbol:"䷉",
+    upper:"乾（天）", lower:"兌（澤）",
+    nature:"宜慎", natureBg:"#fff8e1", natureColor:"#b7791f",
+    keywords:["禮儀","謹慎","行為","規範"],
+    gua:"履虎尾，不咥人，亨。",
+    guaMeaning:"踩踏老虎的尾巴，老虎不咬人，通達。",
+    tuan:"履，柔履剛也，說而應乎乾，是以履虎尾，不咥人，亨。",
+    xiang:"上天下澤，履；君子以辨上下，定民志。",
+    yao:[
+      {name:"初九",ci:"素履往，無咎。",meaning:"以質樸的態度前行，無過失。"},
+      {name:"九二",ci:"履道坦坦，幽人貞吉。",meaning:"行走在平坦大道上，隱居之人守正則吉。"},
+      {name:"六三",ci:"眇能視，跛能履，履虎尾，咥人，凶。武人為於大君。",meaning:"一目失明卻自以為能看，跛腳卻自以為能走，踩了虎尾被咬，凶。武夫自以為可以做大君。"},
+      {name:"九四",ci:"履虎尾，愬愬，終吉。",meaning:"踩踏虎尾，戒懼謹慎，最終吉祥。"},
+      {name:"九五",ci:"夬履，貞厲。",meaning:"決斷地踐行，守正雖有危，但可行。"},
+      {name:"上九",ci:"視履考祥，其旋元吉。",meaning:"回顧自己所走之路，考察吉祥之道，若能反省回歸，大為吉祥。"}
+    ],
+    jiezi:[
+      {char:"履",pinyin:"lǚ",def:"踐踏、行走，引申為禮儀、行為準則。"},
+      {char:"咥",pinyin:"dié",def:"咬，老虎張口噬人之義。"},
+      {char:"眇",pinyin:"miǎo",def:"一目失明，視力有缺之貌。"},
+      {char:"愬",pinyin:"sù",def:"恐懼之貌，戒懼謹慎。"}
+    ]
+  },
+  {num:11,name:"泰",nameEn:"Peace",symbol:"䷊",upper:"坤（地）",lower:"乾（天）",nature:"大吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["通泰","安定","陰陽調和","繁盛"],gua:"小往大來，吉，亨。",guaMeaning:"小的離去，大的到來，吉祥亨通。",tuan:"泰，小往大來，吉亨。則是天地交，而萬物通也；上下交，而其志同也。",xiang:"天地交，泰；后以財成天地之道，輔相天地之宜，以左右民。",yao:[{name:"初九",ci:"拔茅茹，以其匯，征吉。",meaning:"拔起茅草，連同根系一起，與同類一起前進則吉。"},{name:"九二",ci:"包荒，用馮河，不遐遺，朋亡，得尚于中行。",meaning:"包容荒廢，勇於渡河，不遺棄遠方，不拘泥於朋黨，得中道而行。"},{name:"九三",ci:"無平不陂，無往不復，艱貞無咎。",meaning:"沒有一直平坦而不傾斜的，沒有一去不返的，艱難守正則無過。"},{name:"六四",ci:"翩翩不富，以其鄰，不戒以孚。",meaning:"輕盈而不富有，與鄰里共進，不需警戒而以誠信相待。"},{name:"六五",ci:"帝乙歸妹，以祉元吉。",meaning:"帝乙嫁妹，以此獲福，大為吉祥。"},{name:"上六",ci:"城復于隍，勿用師，自邑告命，貞吝。",meaning:"城牆倒塌入護城河，不宜用兵，在封邑內頒布命令，守正雖遺憾但尚可。"}],jiezi:[{char:"泰",pinyin:"tài",def:"通達、安泰，天地相交萬物通暢之義。"},{char:"陂",pinyin:"bēi",def:"傾斜、坡地，不平坦之意。"},{char:"隍",pinyin:"huáng",def:"無水之護城壕溝。"},{char:"翩",pinyin:"piān",def:"輕盈飛翔之貌，此指輕盈不厚重。"}]},
+  {num:12,name:"否",nameEn:"Standstill",symbol:"䷋",upper:"乾（天）",lower:"坤（地）",nature:"宜守",natureBg:"#fff5f5",natureColor:"#9b1b30",keywords:["閉塞","不通","隱退","守正"],gua:"否之匪人，不利君子貞，大往小來。",guaMeaning:"閉塞之時非賢人執政，不利君子守正，大的離去，小的到來。",tuan:"否之匪人，不利君子貞，大往小來。則是天地不交，而萬物不通也。",xiang:"天地不交，否；君子以儉德辟難，不可榮以祿。",yao:[{name:"初六",ci:"拔茅茹，以其匯，貞吉，亨。",meaning:"拔起茅草連同根系，守正則吉，亨通。"},{name:"六二",ci:"包承，小人吉，大人否，亨。",meaning:"包容承受，小人吉祥，大人否塞，但能亨通。"},{name:"六三",ci:"包羞。",meaning:"包含羞恥，自感慚愧。"},{name:"九四",ci:"有命，無咎，疇離祉。",meaning:"有天命，無過失，同類共享福祉。"},{name:"九五",ci:"休否，大人吉。其亡其亡，繫于苞桑。",meaning:"止息否塞，大人吉祥。常存危亡之心，繫於叢生桑樹之上，方能穩固。"},{name:"上九",ci:"傾否，先否後喜。",meaning:"否塞終於傾覆，先否後喜，由凶轉吉。"}],jiezi:[{char:"否",pinyin:"pǐ",def:"閉塞不通，天地不交之義，與泰相對。"},{char:"儉",pinyin:"jiǎn",def:"節儉、收斂，不過度顯露之義。"},{char:"羞",pinyin:"xiū",def:"羞恥、慚愧，此指自省之義。"},{char:"苞",pinyin:"bāo",def:"叢生、茂盛，苞桑即叢生之桑樹，根深而穩。"}]},
+  {num:13,name:"同人",nameEn:"Fellowship with Men",symbol:"䷌",upper:"乾（天）",lower:"離（火）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["和同","合作","廣泛","公正"],gua:"同人于野，亨。利涉大川，利君子貞。",guaMeaning:"在野外與人和同，通達。利於渡越大河，利於君子守正。",tuan:"同人，柔得位得中，而應乎乾，曰同人。同人曰，同人于野，亨，利涉大川，乾行也。",xiang:"天與火，同人；君子以類族辨物。",yao:[{name:"初九",ci:"同人于門，無咎。",meaning:"在門口與人和同，無過失。"},{name:"六二",ci:"同人于宗，吝。",meaning:"只與宗族之人和同，有所遺憾。"},{name:"九三",ci:"伏戎于莽，升其高陵，三歲不興。",meaning:"埋伏軍隊於草叢，登上高陵觀察，三年不能興兵。"},{name:"九四",ci:"乘其墉，弗克攻，吉。",meaning:"登上城牆，卻不能進攻，吉祥。"},{name:"九五",ci:"同人，先號啕而後笑，大師克相遇。",meaning:"與人和同，先大聲哭泣後歡笑，大軍克服困難後相會。"},{name:"上九",ci:"同人于郊，無悔。",meaning:"在郊外與人和同，無悔。"}],jiezi:[{char:"同",pinyin:"tóng",def:"相同、和同，人與人相互認同合作之義。"},{char:"宗",pinyin:"zōng",def:"宗族、家族，同姓之人。"},{char:"莽",pinyin:"mǎng",def:"草木茂密之處，草莽叢林。"},{char:"墉",pinyin:"yōng",def:"城牆，高大之牆壁。"}]},
+  {num:14,name:"大有",nameEn:"Possession in Great Measure",symbol:"䷍",upper:"離（火）",lower:"乾（天）",nature:"大吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["豐盛","富有","光明","廣大"],gua:"元亨。",guaMeaning:"大吉大利，通達。",tuan:"大有，柔得尊位，大中而上下應之，曰大有。其德剛健而文明，應乎天而時行，是以元亨。",xiang:"火在天上，大有；君子以遏惡揚善，順天休命。",yao:[{name:"初九",ci:"無交害，匪咎，艱則無咎。",meaning:"不與人相交就無傷害，非過失，艱難時守正則無過。"},{name:"九二",ci:"大車以載，有攸往，無咎。",meaning:"用大車承載，有所往，無過失。"},{name:"九三",ci:"公用亨于天子，小人弗克。",meaning:"公侯進獻給天子，小人不能做到這樣。"},{name:"九四",ci:"匪其彭，無咎。",meaning:"不過分誇大，無過失。"},{name:"六五",ci:"厥孚交如，威如，吉。",meaning:"以誠信相交，有威嚴，吉祥。"},{name:"上九",ci:"自天祐之，吉無不利。",meaning:"上天保佑，吉祥無不利。"}],jiezi:[{char:"有",pinyin:"yǒu",def:"擁有、占有，豐盛富有之義。"},{char:"遏",pinyin:"è",def:"阻止、遏制，禁止惡行之義。"},{char:"彭",pinyin:"péng",def:"盛大之貌，此指誇張過分。"},{char:"祐",pinyin:"yòu",def:"保佑、幫助，天神護佑之義。"}]},
+  {num:15,name:"謙",nameEn:"Modesty",symbol:"䷎",upper:"坤（地）",lower:"艮（山）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["謙遜","卑下","美德","自省"],gua:"亨，君子有終。",guaMeaning:"通達，君子有善終。",tuan:"謙亨，天道下濟而光明，地道卑而上行。天道虧盈而益謙，地道變盈而流謙，鬼神害盈而福謙，人道惡盈而好謙。",xiang:"地中有山，謙；君子以裒多益寡，稱物平施。",yao:[{name:"初六",ci:"謙謙君子，用涉大川，吉。",meaning:"謙遜又謙遜的君子，用以渡越大川，吉祥。"},{name:"六二",ci:"鳴謙，貞吉。",meaning:"謙遜之德為眾人所稱道，守正則吉。"},{name:"九三",ci:"勞謙君子，有終，吉。",meaning:"勤勞而謙遜的君子，有善終，吉祥。"},{name:"六四",ci:"無不利，撝謙。",meaning:"無不利，發揮謙遜之德。"},{name:"六五",ci:"不富以其鄰，利用侵伐，無不利。",meaning:"不富裕但能與鄰共濟，利於征伐不臣，無不利。"},{name:"上六",ci:"鳴謙，利用行師，征邑國。",meaning:"謙遜之名聞遠方，利於出師，征討城邑之國。"}],jiezi:[{char:"謙",pinyin:"qiān",def:"謙遜、卑讓，不自誇之美德。"},{char:"裒",pinyin:"póu",def:"聚集，此指減少多餘的部分。"},{char:"撝",pinyin:"huī",def:"揮，指揮引導，此指發揮、運用之義。"},{char:"勞",pinyin:"láo",def:"勤勞、功勞，辛勤努力之義。"}]},
+  {num:16,name:"豫",nameEn:"Enthusiasm",symbol:"䷏",upper:"震（雷）",lower:"坤（地）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["喜悅","豫備","音樂","和諧"],gua:"利建侯行師。",guaMeaning:"利於封建諸侯，出師征伐。",tuan:"豫，剛應而志行，順以動，豫。豫順以動，故天地如之，而況建侯行師乎？",xiang:"雷出地奮，豫；先王以作樂崇德，殷薦之上帝，以配祖考。",yao:[{name:"初六",ci:"鳴豫，凶。",meaning:"自鳴得意地誇耀，凶。"},{name:"六二",ci:"介于石，不終日，貞吉。",meaning:"如磐石般堅定，不需等到終日就能判斷，守正則吉。"},{name:"六三",ci:"盱豫，悔；遲有悔。",meaning:"仰望而求歡樂，有悔；遲緩不決亦有悔。"},{name:"九四",ci:"由豫，大有得，勿疑，朋盍簪。",meaning:"由此而樂，大有收穫，勿疑惑，朋友聚合如髮簪。"},{name:"六五",ci:"貞疾，恆不死。",meaning:"守正雖有疾病，能長久不死。"},{name:"上六",ci:"冥豫，成有渝，無咎。",meaning:"沉迷於歡樂，若能及時改變，無過失。"}],jiezi:[{char:"豫",pinyin:"yù",def:"歡樂、豫備，安樂預備之義。"},{char:"盱",pinyin:"xū",def:"仰視，張眼仰望之貌。"},{char:"盍",pinyin:"hé",def:"何不，疑問語氣，此引申為聚合。"},{char:"簪",pinyin:"zān",def:"髮簪，束髮之器，此比喻聚合緊密。"}]},
+  {num:17,name:"隨",nameEn:"Following",symbol:"䷐",upper:"兌（澤）",lower:"震（雷）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["跟隨","順應","適時","靈活"],gua:"元亨，利貞，無咎。",guaMeaning:"大吉大利，利於守正，無過失。",tuan:"隨，剛來而下柔，動而說，隨。大亨貞無咎，而天下隨時，隨之時義大矣哉！",xiang:"澤中有雷，隨；君子以嚮晦入宴息。",yao:[{name:"初九",ci:"官有渝，貞吉。出門交有功。",meaning:"官職有變化，守正則吉。出門與人交往有功績。"},{name:"六二",ci:"系小子，失丈夫。",meaning:"依附小人，則失去君子大人。"},{name:"六三",ci:"系丈夫，失小子。隨有求得，利居貞。",meaning:"依附君子，失去小人。隨從中有所求必得，利於安居守正。"},{name:"九四",ci:"隨有獲，貞凶。有孚在道，以明，何咎？",meaning:"隨從中有所獲，守正雖有凶，但以誠信行正道，光明磊落，有何過失？"},{name:"九五",ci:"孚于嘉，吉。",meaning:"誠信於美善之事，吉祥。"},{name:"上六",ci:"拘系之，乃從維之。王用亨于西山。",meaning:"被拘束繫縛，又加以維繫。王者在西山行祭祀之禮。"}],jiezi:[{char:"隨",pinyin:"suí",def:"跟隨、順從，靈活應時之義。"},{char:"嚮",pinyin:"xiàng",def:"朝向，面對；此指傍晚。"},{char:"宴",pinyin:"yàn",def:"宴息，安閒休息。"},{char:"維",pinyin:"wéi",def:"繩索，維繫固定之義。"}]},
+  {num:18,name:"蠱",nameEn:"Work on What Has Been Spoiled",symbol:"䷑",upper:"艮（山）",lower:"巽（風）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["整治","改革","弊病","振興"],gua:"元亨，利涉大川。先甲三日，後甲三日。",guaMeaning:"大吉大利，利於渡越大川。行事前三日謀劃，行事後三日檢討。",tuan:"蠱，剛上而柔下，巽而止，蠱。蠱，元亨，而天下治也。利涉大川，往有事也。",xiang:"山下有風，蠱；君子以振民育德。",yao:[{name:"初六",ci:"幹父之蠱，有子，考無咎，厲終吉。",meaning:"整治父親遺留之弊，有這樣的兒子，父親無過。雖有危，但終吉。"},{name:"九二",ci:"幹母之蠱，不可貞。",meaning:"整治母親遺留之弊，不可過於剛硬守正。"},{name:"九三",ci:"幹父之蠱，小有悔，無大咎。",meaning:"整治父親遺留之弊，稍有悔恨，但無大過失。"},{name:"六四",ci:"裕父之蠱，往見吝。",meaning:"寬容縱容父親的弊端，如此前往則有遺憾。"},{name:"六五",ci:"幹父之蠱，用譽。",meaning:"整治父親遺留之弊，能獲得聲譽。"},{name:"上九",ci:"不事王侯，高尚其事。",meaning:"不侍奉王侯，高潔其志業。"}],jiezi:[{char:"蠱",pinyin:"gǔ",def:"器皿中蟲，引申為積弊、惑亂，需整治之義。"},{char:"幹",pinyin:"gàn",def:"主幹、整治，擔當、承擔之義。"},{char:"裕",pinyin:"yù",def:"寬裕、縱容，此指過於寬鬆。"},{char:"振",pinyin:"zhèn",def:"振興、拯救，使民眾振奮之義。"}]},
+  {num:19,name:"臨",nameEn:"Approach",symbol:"䷒",upper:"坤（地）",lower:"兌（澤）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["臨近","監臨","春令","興盛"],gua:"元亨，利貞。至于八月有凶。",guaMeaning:"大吉大利，利於守正。到了八月則有凶。",tuan:"臨，剛浸而長，說而順，剛中而應，大亨以正，天之道也。至于八月有凶，消不久也。",xiang:"澤上有地，臨；君子以教思無窮，容保民無疆。",yao:[{name:"初九",ci:"咸臨，貞吉。",meaning:"感應而臨近，守正則吉。"},{name:"九二",ci:"咸臨，吉，無不利。",meaning:"感應而臨近，吉祥，無不利。"},{name:"六三",ci:"甘臨，無攸利，既憂之，無咎。",meaning:"以甜言蜜語臨近，無所利益，若能知憂而自省，無過失。"},{name:"六四",ci:"至臨，無咎。",meaning:"誠至地臨近，無過失。"},{name:"六五",ci:"知臨，大君之宜，吉。",meaning:"以知識和智慧臨民，是大君之道，吉祥。"},{name:"上六",ci:"敦臨，吉，無咎。",meaning:"敦厚地臨民，吉祥，無過失。"}],jiezi:[{char:"臨",pinyin:"lín",def:"居高臨下，監視、親臨之義。"},{char:"咸",pinyin:"xián",def:"皆、全，感應相通之義。"},{char:"甘",pinyin:"gān",def:"甘甜，引申為甜言蜜語，諂媚之義。"},{char:"敦",pinyin:"dūn",def:"敦厚、篤實，樸實厚重之義。"}]},
+  {num:20,name:"觀",nameEn:"Contemplation",symbol:"䷓",upper:"巽（風）",lower:"坤（地）",nature:"宜觀",natureBg:"#e3f0ff",natureColor:"#2b6cb0",keywords:["觀察","瞻仰","示範","省察"],gua:"盥而不薦，有孚顒若。",guaMeaning:"已洗手行齋戒而尚未進行獻祭，誠敬莊重之貌。",tuan:"大觀在上，順而巽，中正以觀天下。觀，盥而不薦，有孚顒若，下觀而化也。",xiang:"風行地上，觀；先王以省方，觀民設教。",yao:[{name:"初六",ci:"童觀，小人無咎，君子吝。",meaning:"如孩童般膚淺地觀察，小人無過，君子則有遺憾。"},{name:"六二",ci:"窺觀，利女貞。",meaning:"從縫隙窺視，利於婦女守正，但君子不宜如此。"},{name:"六三",ci:"觀我生，進退。",meaning:"觀察自己的行為，決定進退之道。"},{name:"六四",ci:"觀國之光，利用賓于王。",meaning:"觀察國家的風光，利於作為賓客覲見君王。"},{name:"九五",ci:"觀我生，君子無咎。",meaning:"觀察自己的行為，君子無過失。"},{name:"上九",ci:"觀其生，君子無咎。",meaning:"觀察他人的生活行為，君子無過失。"}],jiezi:[{char:"觀",pinyin:"guān",def:"觀看、瞻仰，居高觀察之義。"},{char:"盥",pinyin:"guàn",def:"洗手，行祭祀前齋戒沐浴之禮。"},{char:"顒",pinyin:"yóng",def:"仰慕、敬仰，端正誠敬之貌。"},{char:"窺",pinyin:"kuī",def:"從小孔或縫隙觀看，偷窺之義。"}]},
+  {num:21,name:"噬嗑",nameEn:"Biting Through",symbol:"䷔",upper:"離（火）",lower:"震（雷）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["咬合","刑法","決斷","排除障礙"],gua:"亨，利用獄。",guaMeaning:"通達，利於用刑獄處理案件。",tuan:"頤中有物，曰噬嗑，噬嗑而亨，剛柔分，動而明，雷電合而章，柔得中而上行，雖不當位，利用獄也。",xiang:"雷電，噬嗑；先王以明罰勅法。",yao:[{name:"初九",ci:"屨校滅趾，無咎。",meaning:"穿著刑具傷及腳趾，無過失，懲罰輕微使人知所警戒。"},{name:"六二",ci:"噬膚滅鼻，無咎。",meaning:"咬入皮膚沒入鼻子，無過失，刑罰深入但得當。"},{name:"六三",ci:"噬腊肉，遇毒，小吝，無咎。",meaning:"咬乾肉，遇到毒素，稍有遺憾，但無大過失。"},{name:"九四",ci:"噬乾胏，得金矢，利艱貞，吉。",meaning:"咬帶骨乾肉，得到金屬箭矢，艱難守正則吉。"},{name:"六五",ci:"噬乾肉，得黃金，貞厲，無咎。",meaning:"咬乾肉，得到黃金，守正雖有危，但無過失。"},{name:"上九",ci:"何校滅耳，凶。",meaning:"頸部帶枷遮沒耳朵，凶。罪大而受重刑。"}],jiezi:[{char:"噬",pinyin:"shì",def:"咬，用牙齒咬斷之義。"},{char:"嗑",pinyin:"kè",def:"合，口齒相合之義。"},{char:"校",pinyin:"jiào",def:"刑具，枷鎖之類的刑具。"},{char:"腊",pinyin:"xī",def:"乾肉，曬乾的肉。"}]},
+  {num:22,name:"賁",nameEn:"Grace",symbol:"䷕",upper:"艮（山）",lower:"離（火）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["文飾","裝飾","美麗","文化"],gua:"亨，小利有攸往。",guaMeaning:"通達，小事利於有所往。",tuan:"賁，亨，柔來而文剛，故亨。分剛上而文柔，故小利有攸往，天文也；文明以止，人文也。",xiang:"山下有火，賁；君子以明庶政，無敢折獄。",yao:[{name:"初九",ci:"賁其趾，舍車而徒。",meaning:"裝飾腳趾，捨棄車輛而徒步，保持質樸。"},{name:"六二",ci:"賁其須。",meaning:"裝飾鬍鬚，以文飾輔助。"},{name:"九三",ci:"賁如濡如，永貞吉。",meaning:"文飾潤澤，長守正道則吉。"},{name:"六四",ci:"賁如皤如，白馬翰如，匪寇，婚媾。",meaning:"文飾如白，白馬奔馳，非是強寇，乃是前來求婚。"},{name:"六五",ci:"賁于丘園，束帛戔戔，吝，終吉。",meaning:"裝飾丘園，束帛微薄，雖有遺憾，但終吉。"},{name:"上九",ci:"白賁，無咎。",meaning:"素白之飾，返樸歸真，無過失。"}],jiezi:[{char:"賁",pinyin:"bì",def:"文飾、裝飾，使其美麗之義。"},{char:"皤",pinyin:"pó",def:"白色，老人白髮之貌，此指純白。"},{char:"翰",pinyin:"hàn",def:"高飛，此形容白馬奔馳之貌。"},{char:"戔",pinyin:"jiān",def:"微小、少量，此指禮物微薄。"}]},
+  {num:23,name:"剝",nameEn:"Splitting Apart",symbol:"䷖",upper:"艮（山）",lower:"坤（地）",nature:"宜守",natureBg:"#fff5f5",natureColor:"#9b1b30",keywords:["剝落","衰退","隱忍","等待"],gua:"不利有攸往。",guaMeaning:"不利於有所前往。",tuan:"剝，剝也，柔變剛也。不利有攸往，小人長也，順而止之，觀象也。",xiang:"山附于地，剝；上以厚下安宅。",yao:[{name:"初六",ci:"剝床以足，蔑貞，凶。",meaning:"從床腳剝蝕，毀棄正道，凶。"},{name:"六二",ci:"剝床以辨，蔑貞，凶。",meaning:"從床框剝蝕，毀棄正道，凶。"},{name:"六三",ci:"剝之，無咎。",meaning:"雖處剝落之中，能脫離小人而無過失。"},{name:"六四",ci:"剝床以膚，凶。",meaning:"剝蝕到床上的皮膚，凶。"},{name:"六五",ci:"貫魚，以宮人寵，無不利。",meaning:"如穿魚一串，宮人以次序獲寵，無不利。"},{name:"上九",ci:"碩果不食，君子得輿，小人剝廬。",meaning:"碩大果實無人摘食，君子得車，小人連茅廬也被剝奪。"}],jiezi:[{char:"剝",pinyin:"bō",def:"剝落、剝削，陰氣消蝕陽氣之義。"},{char:"蔑",pinyin:"miè",def:"輕視、毀滅，此指毀棄之義。"},{char:"辨",pinyin:"biàn",def:"此指床的橫木，床的框架部分。"},{char:"碩",pinyin:"shuò",def:"大、碩大，果實飽滿豐盈之義。"}]},
+  {num:24,name:"復",nameEn:"Return",symbol:"䷗",upper:"坤（地）",lower:"震（雷）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["回歸","復原","循環","新始"],gua:"亨，出入無疾，朋來無咎。反復其道，七日來復，利有攸往。",guaMeaning:"通達，出入無病，朋友來臨無過。反覆於正道，七日而來回，利於有所往。",tuan:"復亨，剛反，動而以順行，是以出入無疾，朋來無咎。反復其道，七日來復，天行也。",xiang:"雷在地中，復；先王以至日閉關，商旅不行，后不省方。",yao:[{name:"初九",ci:"不遠復，無祗悔，元吉。",meaning:"不遠而歸，無大悔，大吉。"},{name:"六二",ci:"休復，吉。",meaning:"美善地回歸，吉祥。"},{name:"六三",ci:"頻復，厲，無咎。",meaning:"頻繁地往返，有危，但無過失。"},{name:"六四",ci:"中行獨復。",meaning:"行於中道而獨自回歸，能辨別是非。"},{name:"六五",ci:"敦復，無悔。",meaning:"敦厚地回歸，無悔。"},{name:"上六",ci:"迷復，凶，有災眚。用行師，終有大敗，以其國君凶，至于十年不克征。",meaning:"迷失而無法回歸，凶，有災禍。若出師征伐，終有大敗，國君也遭凶，十年之內不能再征。"}],jiezi:[{char:"復",pinyin:"fù",def:"回歸、恢復，陽氣回升之義。"},{char:"頻",pinyin:"pín",def:"頻繁、屢次，反覆多次之義。"},{char:"省",pinyin:"xǐng",def:"察看、巡視，君主巡察之義。"},{char:"眚",pinyin:"shěng",def:"眼睛有病，引申為災難、過失。"}]},
+  {num:25,name:"無妄",nameEn:"Innocence",symbol:"䷘",upper:"乾（天）",lower:"震（雷）",nature:"大吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["自然","真誠","無私","順天"],gua:"元亨，利貞。其匪正，有眚，不利有攸往。",guaMeaning:"大吉大利，利於守正。若不守正道，則有災禍，不利於有所往。",tuan:"無妄，剛自外來，而為主于內，動而健，剛中而應，大亨以正，天之命也。",xiang:"天下雷行，物與無妄；先王以茂對時，育萬物。",yao:[{name:"初九",ci:"無妄往，吉。",meaning:"自然地前往，吉祥。"},{name:"六二",ci:"不耕穫，不菑畬，則利有攸往。",meaning:"不耕種就有收穫，不開荒就有熟田，則利於有所往。"},{name:"六三",ci:"無妄之災，或繫之牛，行人之得，邑人之災。",meaning:"無端之災，有人拴牛，行人得到牛，邑人卻遭受失牛之災。"},{name:"九四",ci:"可貞，無咎。",meaning:"可以守正，無過失。"},{name:"九五",ci:"無妄之疾，勿藥有喜。",meaning:"無端之疾病，不用藥物自然痊癒而有喜。"},{name:"上九",ci:"無妄行，有眚，無攸利。",meaning:"自然而行卻有災禍，無所利益。"}],jiezi:[{char:"妄",pinyin:"wàng",def:"虛妄、無端，此指非分之念。"},{char:"菑",pinyin:"zī",def:"初次開墾的土地，生荒地。"},{char:"畬",pinyin:"yú",def:"開墾兩三年後的熟地。"},{char:"茂",pinyin:"mào",def:"茂盛，此指盡力、努力之義。"}]},
+  {num:26,name:"大畜",nameEn:"The Taming Power of the Great",symbol:"䷙",upper:"艮（山）",lower:"乾（天）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["積蓄","剛健","學問","厚積薄發"],gua:"利貞，不家食吉，利涉大川。",guaMeaning:"利於守正，不在家中食祿而是報效朝廷則吉，利於渡越大川。",tuan:"大畜，剛健篤實，輝光日新，其德剛上而尚賢，能止健，大正也。",xiang:"天在山中，大畜；君子以多識前言往行，以畜其德。",yao:[{name:"初九",ci:"有厲，利已。",meaning:"有危，利於停止不前。"},{name:"九二",ci:"輿說輹。",meaning:"車輛脫掉車輹，無法前進，宜靜待。"},{name:"九三",ci:"良馬逐，利艱貞，曰閑輿衛，利有攸往。",meaning:"良馬追逐，艱難守正則利，學習駕車防衛之術，利於有所往。"},{name:"六四",ci:"童牛之牿，元吉。",meaning:"給小牛裝上木制牛角套，防其傷人，大為吉祥。"},{name:"六五",ci:"豶豕之牙，吉。",meaning:"閹割野豬之牙，去其根本，吉祥。"},{name:"上九",ci:"何天之衢，亨。",meaning:"行走在廣闊的天衢大道上，通達。"}],jiezi:[{char:"畜",pinyin:"xù",def:"積蓄，大量積聚之義，與小畜相對。"},{char:"輹",pinyin:"fù",def:"車輛底部的橫木，連接車軸與車廂。"},{char:"牿",pinyin:"gù",def:"套在牛角上的木制器具，防止牛頂人。"},{char:"豶",pinyin:"fén",def:"閹割，去除野豬的生殖能力以馴服。"}]},
+  {num:27,name:"頤",nameEn:"The Corners of the Mouth",symbol:"䷚",upper:"艮（山）",lower:"震（雷）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["養育","飲食","言語","自養"],gua:"貞吉，觀頤，自求口實。",guaMeaning:"守正則吉，觀察頤養之道，自己求取口中之食。",tuan:"頤，貞吉，養正則吉也。觀頤，觀其所養也；自求口實，觀其自養也。天地養萬物，聖人養賢以及萬民，頤之時大矣哉！",xiang:"山下有雷，頤；君子以慎言語，節飲食。",yao:[{name:"初九",ci:"舍爾靈龜，觀我朵頤，凶。",meaning:"捨棄你靈驗的龜，羨慕我的食物，凶。"},{name:"六二",ci:"顛頤，拂經于丘，頤，征凶。",meaning:"顛倒頤養之道，違背常規從丘地求食，出征則凶。"},{name:"六三",ci:"拂頤，貞凶，十年勿用，無攸利。",meaning:"違背頤養之道，守正雖吉但凶，十年不可任用，無所利益。"},{name:"六四",ci:"顛頤，吉。虎視眈眈，其欲逐逐，無咎。",meaning:"雖顛倒頤養，但吉。如虎之目光炯炯，欲望連綿不斷，無過失。"},{name:"六五",ci:"拂經，居貞吉，不可涉大川。",meaning:"違背常規，但能安居守正則吉，不可渡越大川。"},{name:"上九",ci:"由頤，厲吉，利涉大川。",meaning:"由此頤養天下，雖有危但吉，利於渡越大川。"}],jiezi:[{char:"頤",pinyin:"yí",def:"下顎，引申為頤養，養育之義。"},{char:"朵",pinyin:"duǒ",def:"動，朵頤即動腮嚼食之義。"},{char:"眈",pinyin:"dān",def:"虎視眈眈，目光專注而深沉地凝視。"},{char:"逐",pinyin:"zhú",def:"追逐，此形容欲望連綿不絕。"}]},
+  {num:28,name:"大過",nameEn:"Preponderance of the Great",symbol:"䷛",upper:"兌（澤）",lower:"巽（風）",nature:"宜慎",natureBg:"#fff5f5",natureColor:"#9b1b30",keywords:["超越","獨立","重大","轉機"],gua:"棟橈，利有攸往，亨。",guaMeaning:"棟樑彎曲，利於有所往，通達。",tuan:"大過，大者過也。棟橈，本末弱也。剛過而中，巽而說行，利有攸往，乃亨。大過之時大矣哉！",xiang:"澤滅木，大過；君子以獨立不懼，遁世無悶。",yao:[{name:"初六",ci:"藉用白茅，無咎。",meaning:"用白色茅草墊在下面，表示敬慎，無過失。"},{name:"九二",ci:"枯楊生稊，老夫得其女妻，無不利。",meaning:"枯楊生出嫩芽，老年男子得到年輕妻子，無不利。"},{name:"九三",ci:"棟橈，凶。",meaning:"棟樑彎曲，凶。"},{name:"九四",ci:"棟隆，吉，有它吝。",meaning:"棟樑隆起堅挺，吉，若有其他私心則有遺憾。"},{name:"九五",ci:"枯楊生華，老婦得其士夫，無咎無譽。",meaning:"枯楊開花，老年女子得到年輕丈夫，無過失也無聲譽。"},{name:"上六",ci:"過涉滅頂，凶，無咎。",meaning:"過度涉水沒及頭頂，凶，但非本人之過失。"}],jiezi:[{char:"棟",pinyin:"dòng",def:"屋脊之樑，最重要的支柱。"},{char:"橈",pinyin:"náo",def:"彎曲，受壓而彎折之義。"},{char:"稊",pinyin:"tí",def:"初生的嫩芽，植物新萌之芽。"},{char:"藉",pinyin:"jiè",def:"墊、鋪，用茅草鋪墊以示敬重。"}]},
+  {num:29,name:"坎",nameEn:"The Abysmal Water",symbol:"䷜",upper:"坎（水）",lower:"坎（水）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["險難","水患","智慧","誠信"],gua:"有孚，維心亨，行有尚。",guaMeaning:"有誠信，保持心中通達，行動有所嘉尚。",tuan:"習坎，重險也，水流而不盈，行險而不失其信，維心亨，乃以剛中也，行有尚，往有功也。",xiang:"水洊至，習坎；君子以常德行，習教事。",yao:[{name:"初六",ci:"習坎，入于坎窞，凶。",meaning:"重重險難，陷入深坑之中，凶。"},{name:"九二",ci:"坎有險，求小得。",meaning:"陷入險境，求小有所得。"},{name:"六三",ci:"來之坎坎，險且枕，入于坎窞，勿用。",meaning:"前後皆是險難，且有所依靠，陷入深坑，不可輕舉妄動。"},{name:"六四",ci:"樽酒簋貳，用缶，納約自牖，終無咎。",meaning:"一尊酒兩簋食物，以瓦缶盛裝，從窗戶中遞入，最終無過失。"},{name:"九五",ci:"坎不盈，祗既平，無咎。",meaning:"坑穴未滿，水位已平，無過失。"},{name:"上六",ci:"係用徽纆，寘于叢棘，三歲不得，凶。",meaning:"被繩索捆綁，關入荊棘叢中，三年得不到自由，凶。"}],jiezi:[{char:"坎",pinyin:"kǎn",def:"坑穴，陷落之義，引申為險難。"},{char:"窞",pinyin:"dàn",def:"坑中之坑，更深的陷穴。"},{char:"洊",pinyin:"jiàn",def:"再次、重複，水流不斷重疊而來。"},{char:"牖",pinyin:"yǒu",def:"窗戶，房屋側面開的採光口。"}]},
+  {num:30,name:"離",nameEn:"The Clinging Fire",symbol:"䷝",upper:"離（火）",lower:"離（火）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["光明","附麗","文明","柔中"],gua:"利貞，亨，畜牝牛，吉。",guaMeaning:"利於守正，通達，畜養母牛則吉。",tuan:"離，麗也，日月麗乎天，百穀草木麗乎土，重明以麗乎正，乃化成天下。",xiang:"明兩作，離；大人以繼明照于四方。",yao:[{name:"初九",ci:"履錯然，敬之，無咎。",meaning:"腳步錯亂，以敬慎之心待之，無過失。"},{name:"六二",ci:"黃離，元吉。",meaning:"黃色的附麗，黃居中央，大為吉祥。"},{name:"九三",ci:"日昃之離，不鼓缶而歌，則大耋之嗟，凶。",meaning:"夕陽西斜時的光明，不是擊缶而歌，而是老年人的悲嗟，凶。"},{name:"九四",ci:"突如其來如，焚如，死如，棄如。",meaning:"突然而來，焚燒般、死亡般、拋棄般，急來暴去，無所終。"},{name:"六五",ci:"出涕沱若，戚嗟若，吉。",meaning:"淚水涟涟，憂戚嗟歎，吉祥。"},{name:"上九",ci:"王用出征，有嘉折首，獲匪其醜，無咎。",meaning:"王者出征，嘉獎者是斬獲敵首，所獲非同類之人，無過失。"}],jiezi:[{char:"離",pinyin:"lí",def:"附麗、附著，火附於物而燃，引申為光明。"},{char:"麗",pinyin:"lì",def:"附著、美麗，此指附著依附之義。"},{char:"昃",pinyin:"zè",def:"太陽偏西，日過午後西斜之時。"},{char:"耋",pinyin:"dié",def:"七八十歲的老人，年老之義。"}]},
+  {num:31,name:"咸",nameEn:"Influence",symbol:"䷞",upper:"兌（澤）",lower:"艮（山）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["感應","戀愛","相互影響","謙虛"],gua:"亨，利貞，取女吉。",guaMeaning:"通達，利於守正，娶妻則吉。",tuan:"咸，感也，柔上而剛下，二氣感應以相與，止而說，男下女，是以亨利貞，取女吉也。",xiang:"山上有澤，咸；君子以虛受人。",yao:[{name:"初六",ci:"咸其拇。",meaning:"感應在腳拇趾，影響微弱，尚未有所行動。"},{name:"六二",ci:"咸其腓，凶，居吉。",meaning:"感應在小腿肚，輕率行動則凶，安居則吉。"},{name:"九三",ci:"咸其股，執其隨，往吝。",meaning:"感應在大腿，只會跟隨，輕率前往有遺憾。"},{name:"九四",ci:"貞吉，悔亡；憧憧往來，朋從爾思。",meaning:"守正則吉，悔恨消亡；若心思不定往來無常，朋友只會隨你的私念而動。"},{name:"九五",ci:"咸其脢，無悔。",meaning:"感應在脊背，無悔。"},{name:"上六",ci:"咸其輔頰舌。",meaning:"感應在口頰舌頭，以言語相感，浮淺。"}],jiezi:[{char:"咸",pinyin:"xián",def:"皆、感，相互感應之義。"},{char:"腓",pinyin:"féi",def:"小腿肚，腿後的肌肉。"},{char:"脢",pinyin:"méi",def:"脊背上的肉，背部肌肉。"},{char:"憧",pinyin:"chōng",def:"憧憧，心意不定、往來不止之貌。"}]},
+  {num:32,name:"恆",nameEn:"Duration",symbol:"䷟",upper:"震（雷）",lower:"巽（風）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["持久","恆常","堅守","長遠"],gua:"亨，無咎，利貞，利有攸往。",guaMeaning:"通達，無過失，利於守正，利於有所往。",tuan:"恆，久也，剛上而柔下，雷風相與，巽而動，剛柔皆應，恆。恆亨無咎利貞，久於其道也，天地之道，恆久而不已也。",xiang:"雷風，恆；君子以立不易方。",yao:[{name:"初六",ci:"浚恆，貞凶，無攸利。",meaning:"深求持久，守正雖凶，無所利益。開始就要求過深，反而不能持久。"},{name:"九二",ci:"悔亡。",meaning:"悔恨消亡，能守中道。"},{name:"九三",ci:"不恆其德，或承之羞，貞吝。",meaning:"德行不能持久，有人會使你蒙羞，守正有遺憾。"},{name:"九四",ci:"田無禽。",meaning:"田獵而無所獲，不得其所。"},{name:"六五",ci:"恆其德，貞，婦人吉，夫子凶。",meaning:"德行持久守正，婦人吉而夫子凶。"},{name:"上六",ci:"振恆，凶。",meaning:"振動不安，德行不恆，凶。"}],jiezi:[{char:"恆",pinyin:"héng",def:"持久、恆常，長久不變之義。"},{char:"浚",pinyin:"jùn",def:"深求、深挖，過度追求之義。"},{char:"振",pinyin:"zhèn",def:"振動、搖動，此指德行不穩定。"},{char:"易",pinyin:"yì",def:"改變，不易即不改變、堅守之義。"}]},
+  {num:33,name:"遯",nameEn:"Retreat",symbol:"䷠",upper:"乾（天）",lower:"艮（山）",nature:"宜退",natureBg:"#e3f0ff",natureColor:"#2b6cb0",keywords:["退隱","引退","保全","超然"],gua:"亨，小利貞。",guaMeaning:"通達，小事利於守正。",tuan:"遯亨，遯而亨也，剛當位而應，與時行也。小利貞，浸而長也，遯之時義大矣哉！",xiang:"天下有山，遯；君子以遠小人，不惡而嚴。",yao:[{name:"初六",ci:"遯尾，厲，勿用有攸往。",meaning:"撤退在後，有危，不宜有所往。"},{name:"六二",ci:"執之用黃牛之革，莫之勝說。",meaning:"用黃牛皮革加以束縛，無人能解開，意志堅定。"},{name:"九三",ci:"係遯，有疾厲，畜臣妾，吉。",meaning:"被牽繫而退隱，有疾病危厄，但畜養臣妾則吉。"},{name:"九四",ci:"好遯，君子吉，小人否。",meaning:"喜好退隱，君子吉，小人則不能如此。"},{name:"九五",ci:"嘉遯，貞吉。",meaning:"美善地退隱，守正則吉。"},{name:"上九",ci:"肥遯，無不利。",meaning:"從容肥厚地退隱，無不利，超然物外。"}],jiezi:[{char:"遯",pinyin:"dùn",def:"退隱、逃遁，主動退避之義。"},{char:"係",pinyin:"xì",def:"牽繫、束縛，被情感或事務牽絆。"},{char:"嘉",pinyin:"jiā",def:"美好、嘉善，稱許之義。"},{char:"肥",pinyin:"féi",def:"豐厚、從容，此指退隱得當、超然自在。"}]},
+  {num:34,name:"大壯",nameEn:"The Power of the Great",symbol:"䷡",upper:"震（雷）",lower:"乾（天）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["強盛","陽剛","壯大","節制"],gua:"利貞。",guaMeaning:"利於守正。",tuan:"大壯，大者壯也，剛以動，故壯。大壯利貞，大者正也，正大而天地之情可見矣！",xiang:"雷在天上，大壯；君子以非禮弗履。",yao:[{name:"初九",ci:"壯于趾，征凶，有孚。",meaning:"強壯在腳趾，輕率出征則凶，但有誠信。"},{name:"九二",ci:"貞吉。",meaning:"守正則吉。"},{name:"九三",ci:"小人用壯，君子用罔，貞厲。羝羊觸藩，羸其角。",meaning:"小人炫耀力壯，君子以為不當，守正雖危。公羊觸撞籬笆，角被纏住。"},{name:"九四",ci:"貞吉，悔亡。藩決不羸，壯于大輿之輹。",meaning:"守正則吉，悔亡。籬笆破開不再纏繞，強壯之力作用於大車的輪軸。"},{name:"六五",ci:"喪羊于易，無悔。",meaning:"在牧場失去羊，無悔，不以力爭而自然消解。"},{name:"上六",ci:"羝羊觸藩，不能退，不能遂，無攸利，艱則吉。",meaning:"公羊觸撞籬笆，既不能退，又不能進，無所利益，艱難守正則吉。"}],jiezi:[{char:"壯",pinyin:"zhuàng",def:"強壯、盛大，力量充沛之義。"},{char:"羝",pinyin:"dī",def:"公羊，雄壯之羊。"},{char:"藩",pinyin:"fān",def:"籬笆、屏障，圍護之物。"},{char:"羸",pinyin:"léi",def:"纏繞、困頓，此指羊角被藤蔓纏住。"}]},
+  {num:35,name:"晉",nameEn:"Progress",symbol:"䷢",upper:"離（火）",lower:"坤（地）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["進步","光明","晉升","文明"],gua:"康侯用錫馬蕃庶，晝日三接。",guaMeaning:"賢明的諸侯被賜予許多馬匹，一天之中三次受到君王接見。",tuan:"晉，進也，明出地上，順而麗乎大明，柔進而上行，是以康侯用錫馬蕃庶，晝日三接也。",xiang:"明出地上，晉；君子以自昭明德。",yao:[{name:"初六",ci:"晉如，摧如，貞吉。罔孚，裕，無咎。",meaning:"前進如遭阻折，守正則吉。雖不被信任，但寬裕處之，無過失。"},{name:"六二",ci:"晉如，愁如，貞吉。受茲介福，于其王母。",meaning:"前進如憂愁，守正則吉。從王母處得到大福。"},{name:"六三",ci:"眾允，悔亡。",meaning:"眾人信任，悔恨消亡。"},{name:"九四",ci:"晉如鼫鼠，貞厲。",meaning:"前進如鼫鼠般貪婪鬼祟，守正雖危。"},{name:"六五",ci:"悔亡，失得勿恤，往吉，無不利。",meaning:"悔恨消亡，不要憂慮得失，前往則吉，無不利。"},{name:"上九",ci:"晉其角，維用伐邑，厲吉，無咎，貞吝。",meaning:"進取到了極點，只宜征伐己邑，雖有危但吉，無過失，守正有遺憾。"}],jiezi:[{char:"晉",pinyin:"jìn",def:"前進、晉升，太陽昇起之義，象徵光明進步。"},{char:"康",pinyin:"kāng",def:"安康、賢明，此指安樂賢明的諸侯。"},{char:"錫",pinyin:"xī",def:"賞賜，君主賜予之義。"},{char:"鼫",pinyin:"shí",def:"田鼠之類，鼫鼠即松鼠，比喻貪婪鬼祟。"}]},
+  {num:36,name:"明夷",nameEn:"Darkening of the Light",symbol:"䷣",upper:"坤（地）",lower:"離（火）",nature:"宜守",natureBg:"#e3f0ff",natureColor:"#2b6cb0",keywords:["韜光","困境","隱忍","文王"],gua:"利艱貞。",guaMeaning:"利於在艱難中守正。",tuan:"明入地中，明夷，內文明而外柔順，以蒙大難，文王以之。利艱貞，晦其明也，內難而能正其志，箕子以之。",xiang:"明入地中，明夷；君子以蒞眾，用晦而明。",yao:[{name:"初九",ci:"明夷于飛，垂其翼，君子于行，三日不食，有攸往，主人有言。",meaning:"飛翔中光明受傷，垂下翅膀，君子出行三日不食，前往則主人有閒言。"},{name:"六二",ci:"明夷，夷于左股，用拯馬壯，吉。",meaning:"光明受傷，傷在左腿，用強壯的馬來拯救，吉。"},{name:"九三",ci:"明夷于南狩，得其大首，不可疾貞。",meaning:"往南狩獵，得到主犯，但不可操之過急。"},{name:"六四",ci:"入于左腹，獲明夷之心，于出門庭。",meaning:"進入左腹，洞察暗主的心意，從此離開門庭。"},{name:"六五",ci:"箕子之明夷，利貞。",meaning:"如箕子韜光養晦，利於守正。"},{name:"上六",ci:"不明晦，初登于天，後入于地。",meaning:"不明反晦暗，開始時高升如天，最後卻墜落入地。"}],jiezi:[{char:"夷",pinyin:"yí",def:"傷害、平，此指光明受到傷害。"},{char:"蒞",pinyin:"lì",def:"蒞臨、到達，居高臨下治理之義。"},{char:"晦",pinyin:"huì",def:"昏暗，月末無光之義，引申為隱藏智慧。"},{char:"箕",pinyin:"jī",def:"箕子，商朝末年賢臣，以韜光養晦著稱。"}]},
+  {num:37,name:"家人",nameEn:"The Family",symbol:"䷤",upper:"巽（風）",lower:"離（火）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["家庭","倫理","女正","齊家"],gua:"利女貞。",guaMeaning:"利於婦女守正。",tuan:"家人，女正位乎內，男正位乎外，男女正，天地之大義也。家人有嚴君焉，父母之謂也，父父，子子，兄兄，弟弟，夫夫，婦婦，而家道正，正家而天下定矣。",xiang:"風自火出，家人；君子以言有物而行有恆。",yao:[{name:"初九",ci:"閑有家，悔亡。",meaning:"防閑家規於初始，悔恨消亡。"},{name:"六二",ci:"無攸遂，在中饋，貞吉。",meaning:"無所成就，在家中主持飲食，守正則吉。"},{name:"九三",ci:"家人嗃嗃，悔厲，吉。婦子嘻嘻，終吝。",meaning:"家人嚴肅，雖有悔危，但吉。婦孺嬉笑放縱，終有遺憾。"},{name:"六四",ci:"富家，大吉。",meaning:"使家庭富足，大為吉祥。"},{name:"九五",ci:"王假有家，勿恤，吉。",meaning:"王者到達家中，不必憂慮，吉祥。"},{name:"上九",ci:"有孚威如，終吉。",meaning:"有誠信且有威嚴，最終吉祥。"}],jiezi:[{char:"閑",pinyin:"xián",def:"防閑、限制，設置規範以防患於未然。"},{char:"饋",pinyin:"kuì",def:"進食、饋贈，此指主持家中飲食之事。"},{char:"嗃",pinyin:"hè",def:"嚴厲之貌，家規嚴格之象。"},{char:"假",pinyin:"gé",def:"至、到達，此指感格、到達之義。"}]},
+  {num:38,name:"睽",nameEn:"Opposition",symbol:"䷥",upper:"離（火）",lower:"兌（澤）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["乖違","對立","差異","小事"],gua:"小事吉。",guaMeaning:"小事吉祥。",tuan:"睽，火動而上，澤動而下，二女同居，其志不同行，說而麗乎明，柔進而上行，得中而應乎剛，是以小事吉。天地睽而其事同也，男女睽而其志通也，萬物睽而其事類也，睽之時用大矣哉！",xiang:"上火下澤，睽；君子以同而異。",yao:[{name:"初九",ci:"悔亡，喪馬勿逐，自復；見惡人，無咎。",meaning:"悔恨消亡，丟失馬匹不必追逐，自會回來；接見惡人，無過失。"},{name:"九二",ci:"遇主于巷，無咎。",meaning:"在小巷偶遇主君，無過失。"},{name:"六三",ci:"見輿曳，其牛掣，其人天且劓，無初有終。",meaning:"見車輛被拖拽，牛被牽制，人被刑罰劓鼻，雖無好的開始，但有善終。"},{name:"九四",ci:"睽孤，遇元夫，交孚，厲，無咎。",meaning:"孤立對立，遇到正直之人，以誠信相交，雖有危，但無過失。"},{name:"六五",ci:"悔亡，厥宗噬膚，往何咎。",meaning:"悔恨消亡，宗族之人咬合，前往有何過失？"},{name:"上九",ci:"睽孤，見豕負塗，載鬼一車，先張之弧，後說之弧，匪寇婚媾，往遇雨則吉。",meaning:"孤立對立，見豬身上滿是泥，一車鬼怪，先張弓，後放下弓，非是強寇而是求婚，前往遇雨則吉。"}],jiezi:[{char:"睽",pinyin:"kuí",def:"乖違、對立，眼睛斜視，引申為相背離。"},{char:"掣",pinyin:"chè",def:"牽制、拉扯，阻礙前進之義。"},{char:"劓",pinyin:"yì",def:"古代割鼻之刑罰。"},{char:"弧",pinyin:"hú",def:"木弓，此指弓箭。"}]},
+  {num:39,name:"蹇",nameEn:"Obstruction",symbol:"䷦",upper:"坎（水）",lower:"艮（山）",nature:"宜慎",natureBg:"#fff5f5",natureColor:"#9b1b30",keywords:["艱難","險阻","求援","反省"],gua:"利西南，不利東北。利見大人，貞吉。",guaMeaning:"利於往西南，不利往東北。利於見有德之大人，守正則吉。",tuan:"蹇，難也，險在前也，見險而能止，知矣哉！蹇利西南，往得中也；不利東北，其道窮也。利見大人，往有功也，當位貞吉，以正邦也，蹇之時用大矣哉！",xiang:"山上有水，蹇；君子以反身修德。",yao:[{name:"初六",ci:"往蹇，來譽。",meaning:"前往有艱難，回來則有聲譽。"},{name:"六二",ci:"王臣蹇蹇，匪躬之故。",meaning:"王臣身處重重艱難，並非個人之故而是忠於職守。"},{name:"九三",ci:"往蹇，來反。",meaning:"前往有艱難，回來則是正確之道。"},{name:"六四",ci:"往蹇，來連。",meaning:"前往有艱難，回來則與志同道合者聯合。"},{name:"九五",ci:"大蹇，朋來。",meaning:"大的艱難，朋友來相助。"},{name:"上六",ci:"往蹇，來碩，吉。利見大人。",meaning:"前往有艱難，回來則碩大有成，吉。利於見大人。"}],jiezi:[{char:"蹇",pinyin:"jiǎn",def:"行走困難，足病之義，引申為艱難險阻。"},{char:"譽",pinyin:"yù",def:"聲譽、稱讚，美好的名聲。"},{char:"碩",pinyin:"shuò",def:"大、豐碩，豐盈充實之義。"},{char:"修",pinyin:"xiū",def:"修身、修養，完善自身品德之義。"}]},
+  {num:40,name:"解",nameEn:"Deliverance",symbol:"䷧",upper:"震（雷）",lower:"坎（水）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["解脫","緩解","赦免","新生"],gua:"利西南，無所往，其來復吉；有攸往，夙吉。",guaMeaning:"利於往西南，若無所往，回歸原位則吉；若有所往，早行則吉。",tuan:"解，險以動，動而免乎險，解。解利西南，往得眾也，其來復吉，乃得中也，有攸往夙吉，往有功也。天地解而雷雨作，雷雨作而百果草木皆甲拆，解之時大矣哉！",xiang:"雷雨作，解；君子以赦過宥罪。",yao:[{name:"初六",ci:"無咎。",meaning:"無過失。"},{name:"九二",ci:"田獲三狐，得黃矢，貞吉。",meaning:"田獵獲得三隻狐狸，得到黃色箭矢，守正則吉。"},{name:"六三",ci:"負且乘，致寇至，貞吝。",meaning:"身背重物卻乘車，招致盜寇，守正有遺憾。"},{name:"九四",ci:"解而拇，朋至斯孚。",meaning:"解開拇趾上的束縛，朋友到來則誠信相交。"},{name:"六五",ci:"君子維有解，吉，有孚于小人。",meaning:"君子能解除困難，吉，對小人以誠信相待。"},{name:"上六",ci:"公用射隼于高墉之上，獲之，無不利。",meaning:"公侯在高牆上射隼鷹，獲得之，無不利。"}],jiezi:[{char:"解",pinyin:"jiě",def:"解除、解脫，消除束縛之義。"},{char:"宥",pinyin:"yòu",def:"寬宥、赦免，減輕或免除罪過。"},{char:"隼",pinyin:"sǔn",def:"猛禽，似鷹之鳥，此比喻奸邪小人。"},{char:"墉",pinyin:"yōng",def:"城牆、高牆，高大的圍牆。"}]},
+  {num:41,name:"損",nameEn:"Decrease",symbol:"䷨",upper:"艮（山）",lower:"兌（澤）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["減損","節儉","犧牲","誠信"],gua:"有孚，元吉，無咎，可貞，利有攸往，曷之用，二簋可用享。",guaMeaning:"有誠信，大吉，無過失，可以守正，利於有所往，用什麼祭祀，兩簋食物可以用於祭享。",tuan:"損，損下益上，其道上行，損而有孚，元吉，無咎，可貞，利有攸往，曷之用二簋可用享，二簋應有時，損剛益柔有時。",xiang:"山下有澤，損；君子以懲忿窒欲。",yao:[{name:"初九",ci:"已事遄往，無咎，酌損之。",meaning:"事情完成後迅速前往，無過失，斟酌減損之。"},{name:"九二",ci:"利貞，征凶，弗損，益之。",meaning:"利於守正，出征則凶，不減損而反益之。"},{name:"六三",ci:"三人行，則損一人，一人行，則得其友。",meaning:"三人同行，則減去一人，一人獨行，則會得到朋友。"},{name:"六四",ci:"損其疾，使遄有喜，無咎。",meaning:"減損其疾病，使之迅速痊癒有喜，無過失。"},{name:"六五",ci:"或益之十朋之龜，弗克違，元吉。",meaning:"有人贈以十朋之龜，不可違拒，大為吉祥。"},{name:"上九",ci:"弗損，益之，無咎，貞吉，利有攸往，得臣無家。",meaning:"不減損，反而增益，無過失，守正則吉，利於有所往，得到臣民而無私心。"}],jiezi:[{char:"損",pinyin:"sǔn",def:"減損、損失，減少之義，此指損下益上。"},{char:"遄",pinyin:"chuán",def:"迅速，急速前往之義。"},{char:"忿",pinyin:"fèn",def:"憤怒、氣忿，此指克制怒火。"},{char:"簋",pinyin:"guǐ",def:"古代盛食物的圓形器皿，祭祀用器。"}]},
+  {num:42,name:"益",nameEn:"Increase",symbol:"䷩",upper:"巽（風）",lower:"震（雷）",nature:"大吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["增益","施恩","廣博","利民"],gua:"利有攸往，利涉大川。",guaMeaning:"利於有所往，利於渡越大川。",tuan:"益，損上益下，民說無疆，自上下下，其道大光。利有攸往，中正有慶，利涉大川，木道乃行，益動而巽，日進無疆，天施地生，其益無方，凡益之道，與時偕行。",xiang:"風雷，益；君子以見善則遷，有過則改。",yao:[{name:"初九",ci:"利用為大作，元吉，無咎。",meaning:"利於做大事業，大為吉祥，無過失。"},{name:"六二",ci:"或益之十朋之龜，弗克違，永貞吉，王用享于帝，吉。",meaning:"或有人贈以十朋之龜，不可違拒，長久守正則吉，王者用以祭天，吉。"},{name:"六三",ci:"益之用凶事，無咎，有孚中行，告公用圭。",meaning:"增益用於凶事，無過失，以誠信行中道，告於公侯用圭玉。"},{name:"六四",ci:"中行告公從，利用為依遷國。",meaning:"行中道告知公侯從之，利於作為遷移國都的依據。"},{name:"九五",ci:"有孚惠心，勿問，元吉，有孚惠我德。",meaning:"有誠信惠心，不必占問，大為吉祥，以誠信感動我之德行。"},{name:"上九",ci:"莫益之，或擊之，立心勿恆，凶。",meaning:"沒有人增益，反有人攻擊，立心不能持久，凶。"}],jiezi:[{char:"益",pinyin:"yì",def:"增益、增加，損上益下之義，使下方得益。"},{char:"遷",pinyin:"qiān",def:"遷移、改變，此指遷善改過。"},{char:"圭",pinyin:"guī",def:"古代朝見君王時所持的玉器，信物。"},{char:"惠",pinyin:"huì",def:"惠澤、恩惠，施恩於人之義。"}]},
+  {num:43,name:"夬",nameEn:"Breakthrough",symbol:"䷪",upper:"兌（澤）",lower:"乾（天）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["決斷","揚善"],gua:"揚于王庭，孚號，有厲，告自邑，不利即戎，利有攸往。",guaMeaning:"在朝廷上公開宣揚，以誠信號令，有危厲，從自己的封邑告知，不利於即刻用兵，利於有所往。",tuan:"夬，決也，剛決柔也，健而說，決而和，揚于王庭，柔乘五剛也，孚號有厲，其危乃光也，告自邑不利即戎，所尚乃窮也，利有攸往，剛長乃終也。",xiang:"澤上于天，夬；君子以施祿及下，居德則忌。",yao:[{name:"初九",ci:"壯于前趾，往不勝，為咎。",meaning:"強壯在前趾，輕率前往不能勝，有過失。"},{name:"九二",ci:"惕號，莫夜有戎，勿恤。",meaning:"警惕呼號，即使半夜有兵，不必憂慮。"},{name:"九三",ci:"壯于頄，有凶，君子夬夬，獨行遇雨，若濡有慍，無咎。",meaning:"強壯在顴骨，有凶，君子決然，獨自行走遇雨，雖濕而有怨，但無過失。"},{name:"九四",ci:"臀無膚，其行次且，牽羊悔亡，聞言不信。",meaning:"臀部沒有皮膚，行走困難，牽羊前行悔亡，聽到言語不信。"},{name:"九五",ci:"莧陸夬夬，中行無咎。",meaning:"如莧菜般決斷，行中道無過失。"},{name:"上六",ci:"無號，終有凶。",meaning:"無從號令，最終有凶。"}],jiezi:[{char:"夬",pinyin:"guài",def:"決斷，決口之水，引申為明決果斷。"},{char:"頄",pinyin:"qiú",def:"顴骨，面部突出的骨骼。"},{char:"頄",pinyin:"qiú",def:"顴骨，面部骨骼之一。"},{char:"莧",pinyin:"xiàn",def:"莧菜，易折之菜，此比喻陰柔小人。"}]},
+  {num:44,name:"姤",nameEn:"Coming to Meet",symbol:"䷫",upper:"乾（天）",lower:"巽（風）",nature:"宜慎",natureBg:"#fff5f5",natureColor:"#9b1b30",keywords:["邂逅","防微杜漸","女強","偶遇"],gua:"女壯，勿用取女。",guaMeaning:"女子過於強壯，不宜娶這樣的女子。",tuan:"姤，遇也，柔遇剛也，勿用取女，不可與長也，天地相遇，品物咸章也，剛遇中正，天下大行也，姤之時義大矣哉！",xiang:"天下有風，姤；后以施命誥四方。",yao:[{name:"初六",ci:"繫于金柅，貞吉，有攸往，見凶，羸豕孚蹢躅。",meaning:"繫於金制止車器，守正則吉，有所往則見凶，瘦弱的豬蹄踏不停。"},{name:"九二",ci:"包有魚，無咎，不利賓。",meaning:"廚房有魚，無過失，不利於招待賓客。"},{name:"九三",ci:"臀無膚，其行次且，厲，無大咎。",meaning:"臀部無皮膚，行走困難，有危，但無大過失。"},{name:"九四",ci:"包無魚，起凶。",meaning:"廚房無魚，起事則凶。"},{name:"九五",ci:"以杞包瓜，含章，有隕自天。",meaning:"用杞木包裹瓜果，含有文采，有天降之福。"},{name:"上九",ci:"姤其角，吝，無咎。",meaning:"相遇在角上，有遺憾，但無過失。"}],jiezi:[{char:"姤",pinyin:"gòu",def:"邂逅、相遇，不期而遇之義。"},{char:"柅",pinyin:"nǐ",def:"止車木，用於阻止車輛移動的木器。"},{char:"蹢",pinyin:"dí",def:"蹄，此指豬蹄踏地不停之貌。"},{char:"杞",pinyin:"qǐ",def:"杞木，一種喬木，此比喻君子。"}]},
+  {num:45,name:"萃",nameEn:"Gathering Together",symbol:"䷬",upper:"兌（澤）",lower:"坤（地）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["聚合","匯聚","宗廟","備患"],gua:"亨，王假有廟，利見大人，亨，利貞，用大牲，吉，利有攸往。",guaMeaning:"通達，王者到達宗廟，利於見大人，亨通，利於守正，用大牲祭祀則吉，利於有所往。",tuan:"萃，聚也，順以說，剛中而應，故聚也，王假有廟，致孝享也，利見大人亨，聚以正也，用大牲吉，利有攸往，順天命也，觀其所聚，而天地萬物之情可見矣！",xiang:"澤上于地，萃；君子以除戎器，戒不虞。",yao:[{name:"初六",ci:"有孚不終，乃亂乃萃，若號，一握為笑，勿恤，往無咎。",meaning:"有誠信但不能持久，於是紛亂又聚合，若呼號，一握而轉為笑，不必憂慮，前往無過失。"},{name:"六二",ci:"引吉，無咎，孚乃利用禴。",meaning:"被引導而聚則吉，無過失，誠信則可用簡單祭品。"},{name:"六三",ci:"萃如，嗟如，無攸利，往無咎，小吝。",meaning:"聚合而嗟歎，無所利益，前往無過失，稍有遺憾。"},{name:"九四",ci:"大吉，無咎。",meaning:"大為吉祥，無過失。"},{name:"九五",ci:"萃有位，無咎，匪孚，元永貞，悔亡。",meaning:"聚合而有地位，無過失，雖有不信任者，但能長久守正，悔恨消亡。"},{name:"上六",ci:"齎咨涕洟，無咎。",meaning:"嗟歎哭泣流涕，無過失。"}],jiezi:[{char:"萃",pinyin:"cuì",def:"聚集、匯聚，萬物聚合之義。"},{char:"禴",pinyin:"yuè",def:"夏季的祭祀，祭品簡約的祭禮。"},{char:"戎",pinyin:"róng",def:"兵器、軍事，此指武器裝備。"},{char:"齎",pinyin:"jī",def:"齎咨，嗟歎之聲，悲歎之義。"}]},
+  {num:46,name:"升",nameEn:"Pushing Upward",symbol:"䷭",upper:"坤（地）",lower:"巽（風）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["上升","晉升","積累","南征"],gua:"元亨，用見大人，勿恤，南征吉。",guaMeaning:"大吉大利，利於見大人，不必憂慮，南征則吉。",tuan:"柔以時升，巽而順，剛中而應，是以大亨，用見大人勿恤，有慶也，南征吉，志行也。",xiang:"地中生木，升；君子以順德，積小以高大。",yao:[{name:"初六",ci:"允升，大吉。",meaning:"誠信地上升，大為吉祥。"},{name:"九二",ci:"孚乃利用禴，無咎。",meaning:"有誠信才能利用簡單祭禮，無過失。"},{name:"九三",ci:"升虛邑。",meaning:"升入空邑，暢通無阻。"},{name:"六四",ci:"王用亨于岐山，吉，無咎。",meaning:"王者在岐山祭祀，吉祥，無過失。"},{name:"六五",ci:"貞吉，升階。",meaning:"守正則吉，逐步晉升。"},{name:"上六",ci:"冥升，利于不息之貞。",meaning:"在昏暗中上升，利於不停地守正，但要防止過度。"}],jiezi:[{char:"升",pinyin:"shēng",def:"上升、晉升，從下向上移動之義。"},{char:"允",pinyin:"yǔn",def:"誠信、許可，確實可信之義。"},{char:"岐",pinyin:"qí",def:"岐山，今陝西，周文王興起之地。"},{char:"冥",pinyin:"míng",def:"昏暗、深幽，此指不知節制地上升。"}]},
+  {num:47,name:"困",nameEn:"Oppression",symbol:"䷮",upper:"兌（澤）",lower:"坎（水）",nature:"宜守",natureBg:"#fff5f5",natureColor:"#9b1b30",keywords:["困境","磨礪","守志","不屈"],gua:"亨，貞，大人吉，無咎，有言不信。",guaMeaning:"通達，守正，大人吉祥，無過失，雖有言語但不被信任。",tuan:"困，剛揜也，險以說，困而不失其所亨，其唯君子乎，貞大人吉，以剛中也，有言不信，尚口乃窮也。",xiang:"澤無水，困；君子以致命遂志。",yao:[{name:"初六",ci:"臀困于株木，入于幽谷，三歲不覿。",meaning:"臀部被株木困住，陷入幽暗山谷，三年不能相見。"},{name:"九二",ci:"困于酒食，朱紱方來，利用享祀，征凶，無咎。",meaning:"受酒食之困，紅色蔽膝將來，利於祭祀，出征則凶，無過失。"},{name:"六三",ci:"困于石，據于蒺藜，入于其宮，不見其妻，凶。",meaning:"被石頭困住，依靠蒺藜，進入宮室，見不到妻子，凶。"},{name:"九四",ci:"來徐徐，困于金車，吝，有終。",meaning:"來得緩慢，被金車所困，有遺憾，但有善終。"},{name:"九五",ci:"劓刖，困于赤紱，乃徐有說，利用祭祀。",meaning:"受劓鼻刖足之刑，被赤色蔽膝所困，慢慢地得以解脫，利於祭祀。"},{name:"上六",ci:"困于葛藟，于臲卼，曰動悔，有悔，征吉。",meaning:"被葛藤所困，處於不安之中，說動則有悔，但有悔恨後出征則吉。"}],jiezi:[{char:"困",pinyin:"kùn",def:"困窮、困境，陷於窮途末路之義。"},{char:"覿",pinyin:"dí",def:"見，相見之義。"},{char:"紱",pinyin:"fú",def:"蔽膝，古代的禮服部件，遮住膝蓋的布。"},{char:"蒺藜",pinyin:"jí lí",def:"一種帶刺的草本植物，比喻險惡之環境。"}]},
+  {num:48,name:"井",nameEn:"The Well",symbol:"䷯",upper:"坎（水）",lower:"巽（風）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["水井","恆常","德澤","養民"],gua:"改邑不改井，無喪無得，往來井井，汔至亦未繘井，羸其瓶，凶。",guaMeaning:"遷移邑落但不遷移水井，無所喪失也無所得，往來之人皆仰賴水井，打水將近卻繩子不夠，打破瓦瓶，凶。",tuan:"巽乎水而上水，井，井養而不窮也。改邑不改井，乃以剛中也，汔至亦未繘井，未有功也，羸其瓶，是以凶也。",xiang:"木上有水，井；君子以勞民勸相。",yao:[{name:"初六",ci:"井泥不食，舊井無禽。",meaning:"井中是泥，不能飲用，舊廢之井連禽鳥也不來。"},{name:"九二",ci:"井谷射鮒，甕敝漏。",meaning:"井水只能射到小魚，甕子破漏。"},{name:"九三",ci:"井渫不食，為我心惻，可用汲，王明並受其福。",meaning:"井雖清淘卻無人飲，令我心中悲側，可以汲取，若王者賢明則同受其福。"},{name:"六四",ci:"井甃，無咎。",meaning:"修砌井壁，無過失。"},{name:"九五",ci:"井洌，寒泉食。",meaning:"井水清洌，寒泉可以飲用。"},{name:"上六",ci:"井收，勿幕，有孚，元吉。",meaning:"水井收功，不要遮蓋，有誠信，大為吉祥。"}],jiezi:[{char:"井",pinyin:"jǐng",def:"水井，古代聚落的中心，象徵恆常的供給。"},{char:"繘",pinyin:"jú",def:"打水用的繩子，汲水之索。"},{char:"渫",pinyin:"xiè",def:"淘井，清除井中污泥使水清澈。"},{char:"甃",pinyin:"zhòu",def:"砌磚，用磚石修砌井壁之義。"}]},
+  {num:49,name:"革",nameEn:"Revolution",symbol:"䷰",upper:"兌（澤）",lower:"離（火）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["變革","革新","改制","時機"],gua:"己日乃孚，元亨，利貞，悔亡。",guaMeaning:"己日之後方才被信任，大吉大利，利於守正，悔恨消亡。",tuan:"革，水火相息，二女同居，其志不相得，曰革。己日乃孚，革而信之，文明以說，大亨以正，革而當，其悔乃亡，天地革而四時成，湯武革命，順乎天而應乎人，革之時大矣哉！",xiang:"澤中有火，革；君子以治歷明時。",yao:[{name:"初九",ci:"鞏用黃牛之革。",meaning:"以黃牛皮革加以鞏固，時機未到，不宜輕動。"},{name:"六二",ci:"己日乃革之，征吉，無咎。",meaning:"己日方可進行變革，出征則吉，無過失。"},{name:"九三",ci:"征凶，貞厲，革言三就，有孚。",meaning:"出征則凶，守正雖危，變革之言三次確立，有誠信。"},{name:"九四",ci:"悔亡，有孚改命，吉。",meaning:"悔恨消亡，以誠信改變命令，吉祥。"},{name:"九五",ci:"大人虎變，未占有孚。",meaning:"大人虎變，如虎換毛般明顯，不必占問而誠信可見。"},{name:"上六",ci:"君子豹變，小人革面，征凶，居貞吉。",meaning:"君子豹變，小人只是改變表面，出征則凶，安居守正則吉。"}],jiezi:[{char:"革",pinyin:"gé",def:"皮革，引申為改革、變革，去舊換新之義。"},{char:"鞏",pinyin:"gǒng",def:"堅固、鞏固，用皮革加固之義。"},{char:"虎變",pinyin:"hǔ biàn",def:"如老虎換毛，變化顯著而文采斑斕。"},{char:"豹變",pinyin:"bào biàn",def:"如豹換毛，變化略小於虎，但也斑斕可觀。"}]},
+  {num:50,name:"鼎",nameEn:"The Cauldron",symbol:"䷱",upper:"離（火）",lower:"巽（風）",nature:"大吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["烹飪","文明","鼎新","養賢"],gua:"元吉，亨。",guaMeaning:"大為吉祥，通達。",tuan:"鼎，象也，以木巽火，亨飪也，聖人亨以享上帝，而大亨以養聖賢，巽而耳目聰明，柔進而上行，得中而應乎剛，是以元亨。",xiang:"木上有火，鼎；君子以正位凝命。",yao:[{name:"初六",ci:"鼎顛趾，利出否，得妾以其子，無咎。",meaning:"鼎足傾倒，利於清除鼎中污穢，得妾以其子，無過失。"},{name:"九二",ci:"鼎有實，我仇有疾，不我能即，吉。",meaning:"鼎中有食物，我的對手有疾，不能接近我，吉祥。"},{name:"九三",ci:"鼎耳革，其行塞，雉膏不食，方雨虧悔，終吉。",meaning:"鼎耳脫落，難以搬運，雉雞油脂無人食，正逢雨時悔恨，但終吉。"},{name:"九四",ci:"鼎折足，覆公餗，其形渥，凶。",meaning:"鼎足折斷，傾覆公家的珍饌，形體被污染，凶。"},{name:"六五",ci:"鼎黃耳，金鉉，利貞。",meaning:"鼎有黃金之耳，金制鼎鉉，利於守正。"},{name:"上九",ci:"鼎玉鉉，大吉，無不利。",meaning:"鼎有玉制之鉉，大為吉祥，無不利。"}],jiezi:[{char:"鼎",pinyin:"dǐng",def:"三足兩耳之烹飪器，象徵國家重器、政權。"},{char:"餗",pinyin:"sù",def:"鼎中的食物，珍饌美食。"},{char:"鉉",pinyin:"xuàn",def:"穿過鼎耳以抬鼎的橫木或金屬。"},{char:"渥",pinyin:"wò",def:"沾濕、污染，此指因覆鼎而被污染。"}]},
+  {num:51,name:"震",nameEn:"The Arousing Thunder",symbol:"䷲",upper:"震（雷）",lower:"震（雷）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["雷震","警覺","恐懼","奮發"],gua:"亨，震來虩虩，笑言啞啞，震驚百里，不喪匕鬯。",guaMeaning:"通達，雷聲來時令人恐懼，但之後笑語歡暢，震動百里之遠，持匕鬯祭酒也不丟失。",tuan:"震亨，震來虩虩，恐致福也，笑言啞啞，後有則也，震驚百里，驚遠而懼邇也，出可以守宗廟社稷，以為祭主也。",xiang:"洊雷，震；君子以恐懼修省。",yao:[{name:"初九",ci:"震來虩虩，後笑言啞啞，吉。",meaning:"雷聲來時令人恐懼，之後笑言歡暢，吉祥。"},{name:"六二",ci:"震來厲，億喪貝，躋于九陵，勿逐，七日得。",meaning:"雷來危厲，大量財物喪失，登上九重高陵，不必追逐，七日自然得回。"},{name:"六三",ci:"震蘇蘇，震行無眚。",meaning:"震動中慘淡驚懼，在雷震中行進無災禍。"},{name:"九四",ci:"震遂泥。",meaning:"雷震陷於泥濘。"},{name:"六五",ci:"震往來厲，億無喪，有事。",meaning:"雷震往來有危厲，估計沒有損失，有所事為。"},{name:"上六",ci:"震索索，視矍矍，征凶。震不于其躬，于其鄰，無咎，婚媾有言。",meaning:"震動戰慄，目光驚惶，出征則凶。災難不在自身而在鄰近，無過失，婚媾有閒言。"}],jiezi:[{char:"震",pinyin:"zhèn",def:"雷，震動，引申為恐懼、奮發。"},{char:"虩",pinyin:"xì",def:"恐懼之貌，震驚戰慄之象。"},{char:"啞",pinyin:"è",def:"此指笑聲，啞啞即笑聲歡暢之貌。"},{char:"鬯",pinyin:"chàng",def:"鬱金香酒，祭祀時所用的香酒。"}]},
+  {num:52,name:"艮",nameEn:"Keeping Still Mountain",symbol:"䷳",upper:"艮（山）",lower:"艮（山）",nature:"宜守",natureBg:"#e3f0ff",natureColor:"#2b6cb0",keywords:["靜止","止息","冥想","自制"],gua:"艮其背，不獲其身，行其庭，不見其人，無咎。",guaMeaning:"止息於背部，感覺不到身體，行走在庭院，看不見人，無過失。",tuan:"艮，止也，時止則止，時行則行，動靜不失其時，其道光明，艮其止，止其所也，上下敵應，不相與也，是以不獲其身，行其庭不見其人，無咎也。",xiang:"兼山，艮；君子以思不出其位。",yao:[{name:"初六",ci:"艮其趾，無咎，利永貞。",meaning:"止息腳趾，無過失，利於長久守正。"},{name:"六二",ci:"艮其腓，不拯其隨，其心不快。",meaning:"止息小腿肚，不能救助所跟隨之人，心中不快。"},{name:"九三",ci:"艮其限，列其夤，厲薰心。",meaning:"止息腰部，使脊肉分裂，危厲使人心焦如薰。"},{name:"六四",ci:"艮其身，無咎。",meaning:"止息全身，無過失。"},{name:"六五",ci:"艮其輔，言有序，悔亡。",meaning:"止息口輔（腮部），說話有條有序，悔恨消亡。"},{name:"上九",ci:"敦艮，吉。",meaning:"敦厚地止息，吉祥。"}],jiezi:[{char:"艮",pinyin:"gèn",def:"止，山之形，重疊之山，引申為靜止不動。"},{char:"腓",pinyin:"féi",def:"小腿肚，腿後的肌肉。"},{char:"夤",pinyin:"yín",def:"脊肉，背部的肌肉。"},{char:"輔",pinyin:"fǔ",def:"口輔，面頰與牙床之肉，助說話之義。"}]},
+  {num:53,name:"漸",nameEn:"Development",symbol:"䷴",upper:"巽（風）",lower:"艮（山）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["漸進","婚嫁","循序","文雅"],gua:"女歸吉，利貞。",guaMeaning:"女子出嫁吉祥，利於守正。",tuan:"漸之進也，女歸吉也，進得位，往有功也，進以正，可以正邦也，其位剛得中也，止而巽，動不窮也。",xiang:"山上有木，漸；君子以居賢德善俗。",yao:[{name:"初六",ci:"鴻漸于干，小子厲，有言，無咎。",meaning:"鴻雁漸飛到水邊，小子有危，有閒言，但無過失。"},{name:"六二",ci:"鴻漸于磐，飲食衎衎，吉。",meaning:"鴻雁漸飛到磐石上，飲食歡樂，吉祥。"},{name:"九三",ci:"鴻漸于陸，夫征不復，婦孕不育，凶，利禦寇。",meaning:"鴻雁漸飛到陸地，丈夫出征不回，婦女懷孕卻不能養育，凶，利於抵禦外寇。"},{name:"六四",ci:"鴻漸于木，或得其桷，無咎。",meaning:"鴻雁漸飛到木上，或找到平坦的椽木棲息，無過失。"},{name:"九五",ci:"鴻漸于陵，婦三歲不孕，終莫之勝，吉。",meaning:"鴻雁漸飛到高陵，婦人三年不孕，但終究無人能勝，吉。"},{name:"上九",ci:"鴻漸于陸，其羽可用為儀，吉。",meaning:"鴻雁漸飛到高處，其羽毛可用作禮儀之飾，吉祥。"}],jiezi:[{char:"漸",pinyin:"jiàn",def:"漸進、循序漸進，逐步發展之義。"},{char:"鴻",pinyin:"hóng",def:"大雁，候鳥，此以鴻雁的漸進飛行比喻人事。"},{char:"衎",pinyin:"kàn",def:"快樂、和樂之貌。"},{char:"桷",pinyin:"jué",def:"椽木，方形的屋椽，平坦可棲之木。"}]},
+  {num:54,name:"歸妹",nameEn:"The Marrying Maiden",symbol:"䷵",upper:"震（雷）",lower:"兌（澤）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["婚嫁","少女","從屬","知足"],gua:"征凶，無攸利。",guaMeaning:"出征則凶，無所利益。",tuan:"歸妹，天地之大義也，天地不交而萬物不興，歸妹人之終始也，說以動，所歸妹也，征凶，位不當也，無攸利，柔乘剛也。",xiang:"澤上有雷，歸妹；君子以永終知敝。",yao:[{name:"初九",ci:"歸妹以娣，跛能履，征吉。",meaning:"少女嫁作滕妾，雖跛腳仍能行走，出征則吉。"},{name:"九二",ci:"眇能視，利幽人之貞。",meaning:"雖一目失明仍能看，利於幽居之人守正。"},{name:"六三",ci:"歸妹以須，反歸以娣。",meaning:"待字出嫁，卻反而以滕妾身份歸嫁。"},{name:"九四",ci:"歸妹愆期，遲歸有時。",meaning:"出嫁逾期，遲嫁另有時機。"},{name:"六五",ci:"帝乙歸妹，其君之袂，不如其娣之袂良，月幾望，吉。",meaning:"帝乙嫁妹，其君的衣袖不如滕妾的衣袖美麗，月近望，吉。"},{name:"上六",ci:"女承筐無實，士刲羊無血，無攸利。",meaning:"女子端筐卻空無所有，男子割羊卻無血，無所利益，婚禮形式而無實質。"}],jiezi:[{char:"歸",pinyin:"guī",def:"女子出嫁，此指歸嫁之義。"},{char:"娣",pinyin:"dì",def:"古代隨嫁的妹妹或侍妾，滕妾。"},{char:"袂",pinyin:"mèi",def:"衣袖，此代指衣服禮服。"},{char:"刲",pinyin:"kuī",def:"割，切割之義。"}]},
+  {num:55,name:"豐",nameEn:"Abundance",symbol:"䷶",upper:"震（雷）",lower:"離（火）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["豐盛","光明","盛大","珍惜"],gua:"亨，王假之，勿憂，宜日中。",guaMeaning:"通達，王者到達此境地，不必憂慮，宜在日正當中時有所作為。",tuan:"豐，大也，明以動，故豐，王假之，尚大也，勿憂宜日中，宜照天下也，日中則昃，月盈則食，天地盈虛，與時消息，而況于人乎？況于鬼神乎？",xiang:"雷電皆至，豐；君子以折獄致刑。",yao:[{name:"初九",ci:"遇其配主，雖旬無咎，往有尚。",meaning:"遇到相配的主人，雖同等也無過失，前往有所嘉獎。"},{name:"六二",ci:"豐其蔀，日中見斗，往得疑疾，有孚發若，吉。",meaning:"豐盛其遮蔽，日正當中卻見北斗，前往受到猜疑，但有誠信得以開發，吉。"},{name:"九三",ci:"豐其沛，日中見沫，折其右肱，無咎。",meaning:"豐盛其旗幟，日中見到細小之星，折損右臂，無過失。"},{name:"九四",ci:"豐其蔀，日中見斗，遇其夷主，吉。",meaning:"豐盛其遮蔽，日中見北斗，遇到同等之主，吉祥。"},{name:"六五",ci:"來章，有慶譽，吉。",meaning:"光明之章到來，有喜慶聲譽，吉祥。"},{name:"上六",ci:"豐其屋，蔀其家，窺其戶，闃其無人，三歲不覿，凶。",meaning:"豐大其屋，遮蔽其家，窺視其門戶，空無一人，三年不見，凶。"}],jiezi:[{char:"豐",pinyin:"fēng",def:"豐盛、豐大，充實飽滿之義。"},{char:"蔀",pinyin:"bù",def:"遮蔽光線的草席，此比喻遮蔽光明。"},{char:"沛",pinyin:"pèi",def:"旗幟，此指遮蔽之物。"},{char:"闃",pinyin:"qù",def:"靜寂，空無一人之貌。"}]},
+  {num:56,name:"旅",nameEn:"The Wanderer",symbol:"䷷",upper:"離（火）",lower:"艮（山）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["旅行","羈旅","謹慎","孤獨"],gua:"小亨，旅貞吉。",guaMeaning:"小有通達，旅行守正則吉。",tuan:"旅，小亨，柔得中乎外而順乎剛，止而麗乎明，是以小亨，旅貞吉也，旅之時義大矣哉！",xiang:"山上有火，旅；君子以明慎用刑，而不留獄。",yao:[{name:"初六",ci:"旅瑣瑣，斯其所取災。",meaning:"旅行時瑣碎計較，這是自取災禍。"},{name:"六二",ci:"旅即次，懷其資，得童仆，貞。",meaning:"旅行至住處，懷抱財貨，得到童仆，守正。"},{name:"九三",ci:"旅焚其次，喪其童仆，貞厲。",meaning:"旅行中住所被焚，失去童仆，守正雖危。"},{name:"九四",ci:"旅于處，得其資斧，我心不快。",meaning:"旅途中有所棲處，得到資財和斧具，但心中不快。"},{name:"六五",ci:"射雉一矢亡，終以譽命。",meaning:"射雉鳥一矢中的，最終以聲譽受命。"},{name:"上九",ci:"鳥焚其巢，旅人先笑後號啕，喪牛于易，凶。",meaning:"鳥巢被焚，旅人先笑後大哭，在牧場失去牛，凶。"}],jiezi:[{char:"旅",pinyin:"lǚ",def:"旅行、羈旅，在外作客之義。"},{char:"瑣",pinyin:"suǒ",def:"瑣碎、細小，此指計較細節。"},{char:"次",pinyin:"cì",def:"旅館、臨時住所，軍隊駐紮之所。"},{char:"雉",pinyin:"zhì",def:"野雞，羽毛美麗的雉雞，此比喻文采。"}]},
+  {num:57,name:"巽",nameEn:"The Gentle Wind",symbol:"䷸",upper:"巽（風）",lower:"巽（風）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["謙遜","順從","滲透","申命"],gua:"小亨，利有攸往，利見大人。",guaMeaning:"小有通達，利於有所往，利於見大人。",tuan:"重巽以申命，剛巽乎中正而志行，柔皆順乎剛，是以小亨，利有攸往，利見大人。",xiang:"隨風，巽；君子以申命行事。",yao:[{name:"初六",ci:"進退，利武人之貞。",meaning:"進退不定，利於武人守正之道。"},{name:"九二",ci:"巽在床下，用史巫紛若，吉，無咎。",meaning:"謙遜到床下，用史官巫師紛繁占問，吉祥，無過失。"},{name:"九三",ci:"頻巽，吝。",meaning:"頻繁謙遜，有遺憾。"},{name:"六四",ci:"悔亡，田獲三品。",meaning:"悔恨消亡，田獵獲得三種獵物。"},{name:"九五",ci:"貞吉，悔亡，無不利，無初有終，先庚三日，後庚三日，吉。",meaning:"守正則吉，悔恨消亡，無不利，雖無好的開始但有善終，庚日前三日和後三日，吉。"},{name:"上九",ci:"巽在床下，喪其資斧，貞凶。",meaning:"謙遜到床下，失去資財和斧具，守正雖凶。"}],jiezi:[{char:"巽",pinyin:"xùn",def:"謙遜、順從，風之象，引申為滲透、柔和。"},{char:"申",pinyin:"shēn",def:"重申、申明，再次宣示之義。"},{char:"紛",pinyin:"fēn",def:"紛繁、眾多，此形容史巫占問頻繁。"},{char:"庚",pinyin:"gēng",def:"天干之一，位於第七位，此指特定時日。"}]},
+  {num:58,name:"兌",nameEn:"The Joyous Lake",symbol:"䷹",upper:"兌（澤）",lower:"兌（澤）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["喜悅","說服","交流","和諧"],gua:"亨，利貞。",guaMeaning:"通達，利於守正。",tuan:"兌，說也，剛中而柔外，說以利貞，是以順乎天而應乎人，說以先民，民忘其勞，說以犯難，民忘其死，說之大，民勸矣哉！",xiang:"麗澤，兌；君子以朋友講習。",yao:[{name:"初九",ci:"和兌，吉。",meaning:"和諧喜悅，吉祥。"},{name:"九二",ci:"孚兌，吉，悔亡。",meaning:"誠信喜悅，吉祥，悔恨消亡。"},{name:"六三",ci:"來兌，凶。",meaning:"以諂媚取悅，凶。"},{name:"九四",ci:"商兌未寧，介疾有喜。",meaning:"商議喜悅之道，尚未安寧，堅守正道能去疾有喜。"},{name:"九五",ci:"孚于剝，有厲。",meaning:"誠信於剝蝕之道，有危厲。"},{name:"上六",ci:"引兌。",meaning:"被引誘而悅，喪失主動，有危。"}],jiezi:[{char:"兌",pinyin:"duì",def:"喜悅、悅服，澤水之象，潤澤萬物之義。"},{char:"麗",pinyin:"lì",def:"相連、並列，此指兩澤相連之象。"},{char:"剝",pinyin:"bō",def:"剝蝕，此指被小人腐蝕之義。"},{char:"商",pinyin:"shāng",def:"商議、討論，此指考量、籌謀之義。"}]},
+  {num:59,name:"渙",nameEn:"Dispersion",symbol:"䷺",upper:"巽（風）",lower:"坎（水）",nature:"吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["渙散","融合","聚人心","宗廟"],gua:"亨，王假有廟，利涉大川，利貞。",guaMeaning:"通達，王者到達宗廟，利於渡越大川，利於守正。",tuan:"渙亨，剛來而不窮，柔得位乎外而上同，王假有廟，王乃在中也，利涉大川，乘木有功也。",xiang:"風行水上，渙；先王以享于帝立廟。",yao:[{name:"初六",ci:"用拯馬壯，吉。",meaning:"用強壯的馬來拯救，吉祥。"},{name:"九二",ci:"渙奔其機，悔亡。",meaning:"渙散時奔向所依靠之物，悔恨消亡。"},{name:"六三",ci:"渙其躬，無悔。",meaning:"渙散自身之私，無悔。"},{name:"六四",ci:"渙其群，元吉，渙有丘，匪夷所思。",meaning:"渙散其群黨，大為吉祥，渙散後聚成高丘，非常人所能想到。"},{name:"九五",ci:"渙汗其大號，渙王居，無咎。",meaning:"如汗水般發出大號令，渙散王室，無過失。"},{name:"上九",ci:"渙其血，去逖出，無咎。",meaning:"渙散流血之禍，遠離危險而出，無過失。"}],jiezi:[{char:"渙",pinyin:"huàn",def:"渙散、消散，水流分散之義，引申為離散後重聚。"},{char:"機",pinyin:"jī",def:"機杼、幾案，此指有所依靠之物。"},{char:"逖",pinyin:"tì",def:"遠，此指遠離、疏遠之義。"},{char:"享",pinyin:"xiǎng",def:"享祀，祭獻之義，此指祭祀上帝。"}]},
+  {num:60,name:"節",nameEn:"Limitation",symbol:"䷻",upper:"坎（水）",lower:"兌（澤）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["節制","適度","法度","節律"],gua:"亨，苦節不可貞。",guaMeaning:"通達，但苦澀的節制不可長久守正。",tuan:"節亨，剛柔分而剛得中，苦節不可貞，其道窮也，說以行險，當位以節，中正以通，天地節而四時成，節以制度，不傷財，不害民。",xiang:"澤上有水，節；君子以制數度，議德行。",yao:[{name:"初九",ci:"不出戶庭，無咎。",meaning:"不出門庭，無過失。"},{name:"九二",ci:"不出門庭，凶。",meaning:"不出門庭，凶。節制過度則失去時機。"},{name:"六三",ci:"不節若，則嗟若，無咎。",meaning:"不加節制，則嗟歎悔恨，無過失，能知悔便可。"},{name:"六四",ci:"安節，亨。",meaning:"安然節制，通達。"},{name:"九五",ci:"甘節，吉，往有尚。",meaning:"甘美的節制，吉祥，前往有所嘉獎。"},{name:"上六",ci:"苦節，貞凶，悔亡。",meaning:"苦澀的節制，守正則凶，悔恨消亡。"}],jiezi:[{char:"節",pinyin:"jié",def:"節制、節律，竹節之象，引申為適度節制。"},{char:"數",pinyin:"shù",def:"數目、法度，制定節制之標準。"},{char:"議",pinyin:"yì",def:"議論、討論，此指研討商議之義。"},{char:"甘",pinyin:"gān",def:"甘美、適當，此指恰到好處的節制。"}]},
+  {num:61,name:"中孚",nameEn:"Inner Truth",symbol:"䷼",upper:"巽（風）",lower:"兌（澤）",nature:"大吉",natureBg:"#f0fff4",natureColor:"#276749",keywords:["誠信","內在","感化","豚魚"],gua:"豚魚吉，利涉大川，利貞。",guaMeaning:"即使豬魚這樣的物也可以感化，利於渡越大川，利於守正。",tuan:"中孚，柔在內而剛得中，說而巽，孚，乃化邦也，豚魚吉，信及豚魚也，利涉大川，乘木舟虛也，中孚以利貞，乃應乎天也。",xiang:"澤上有風，中孚；君子以議獄緩死。",yao:[{name:"初九",ci:"虞吉，有他不燕。",meaning:"安定守正則吉，若心有他圖則不安。"},{name:"九二",ci:"鳴鶴在陰，其子和之，我有好爵，吾與爾靡之。",meaning:"鶴在陰處鳴叫，其子相和應之，我有美酒，與你共享。"},{name:"六三",ci:"得敵，或鼓或罷，或泣或歌。",meaning:"遇到對手，或擊鼓或停止，或哭泣或歌唱，態度不定。"},{name:"六四",ci:"月幾望，馬匹亡，無咎。",meaning:"月近望日，馬匹失散，無過失。"},{name:"九五",ci:"有孚攣如，無咎。",meaning:"有誠信相連結，無過失。"},{name:"上九",ci:"翰音登于天，貞凶。",meaning:"鳥鳴聲上達於天，守正則凶，有名無實之象。"}],jiezi:[{char:"孚",pinyin:"fú",def:"誠信，鳥孵卵之形，引申為誠實可信。"},{char:"豚",pinyin:"tún",def:"小豬，此與魚並列，比喻至微之物。"},{char:"攣",pinyin:"luán",def:"相連、牽連，緊密連結之貌。"},{char:"翰",pinyin:"hàn",def:"鳥羽，此指鳥鳴聲遠揚。"}]},
+  {num:62,name:"小過",nameEn:"Preponderance of the Small",symbol:"䷽",upper:"震（雷）",lower:"艮（山）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["小事","謹慎","過度","飛鳥"],gua:"亨，利貞，可小事，不可大事，飛鳥遺之音，不宜上，宜下，大吉。",guaMeaning:"通達，利於守正，可做小事，不可做大事，飛鳥留下鳥鳴聲，不宜上升，宜於下行，大為吉祥。",tuan:"小過，小者過而亨也，過以利貞，與時行也，柔得中，是以小事吉也，剛失位而不中，是以不可大事也，有飛鳥之象焉，飛鳥遺之音，不宜上宜下，大吉，上逆而下順也。",xiang:"山上有雷，小過；君子以行過乎恭，喪過乎哀，用過乎儉。",yao:[{name:"初六",ci:"飛鳥以凶。",meaning:"飛鳥逆行，凶。"},{name:"六二",ci:"過其祖，遇其妣，不及其君，遇其臣，無咎。",meaning:"越過其祖，遇到其祖母，不到達君主，遇到臣屬，無過失。"},{name:"九三",ci:"弗過防之，從或戕之，凶。",meaning:"不過度防備，隨從或有傷害，凶。"},{name:"九四",ci:"無咎，弗過遇之，往厲，必戒，勿用永貞。",meaning:"無過失，不過度而相遇，前往有危，必須警戒，不宜長久守正。"},{name:"六五",ci:"密雲不雨，自我西郊，公弋取彼在穴。",meaning:"濃雲不雨，從我西郊而來，公侯用繩射取穴中之鳥。"},{name:"上六",ci:"弗遇過之，飛鳥離之，凶，是謂災眚。",meaning:"不遇而過度，飛鳥離去，凶，這就叫做災禍。"}],jiezi:[{char:"過",pinyin:"guò",def:"超過、過度，此指稍稍超過之義。"},{char:"妣",pinyin:"bǐ",def:"已故的母親，祖母之義。"},{char:"戕",pinyin:"qiāng",def:"傷害、殺害之義。"},{char:"弋",pinyin:"yì",def:"用繩射鳥，以箭和繩捕鳥之法。"}]},
+  {num:63,name:"既濟",nameEn:"After Completion",symbol:"䷾",upper:"坎（水）",lower:"離（火）",nature:"宜慎",natureBg:"#fff8e1",natureColor:"#b7791f",keywords:["完成","謹慎","防患","盛極而衰"],gua:"亨，小利貞，初吉終亂。",guaMeaning:"通達，小事利於守正，開始吉祥，終究紛亂。",tuan:"既濟亨，小者亨也，利貞，剛柔正而位當也，初吉，柔得中也，終止則亂，其道窮也。",xiang:"水在火上，既濟；君子以思患而豫防之。",yao:[{name:"初九",ci:"曳其輪，濡其尾，無咎。",meaning:"拖曳車輪，浸濕尾巴，無過失，謹慎防止過於冒進。"},{name:"六二",ci:"婦喪其茀，勿逐，七日得。",meaning:"婦人失去車前障蔽，不必追逐，七日自然得回。"},{name:"九三",ci:"高宗伐鬼方，三年克之，小人勿用。",meaning:"殷高宗征伐鬼方，三年才克勝，小人不可任用。"},{name:"六四",ci:"繻有衣袽，終日戒。",meaning:"備有敝衣堵漏，整日保持戒備。"},{name:"九五",ci:"東鄰殺牛，不如西鄰之禴祭，實受其福。",meaning:"東鄰大肆殺牛祭祀，不如西鄰的簡單禴祭，實際上得到的福祉更多。"},{name:"上六",ci:"濡其首，厲。",meaning:"頭部被水浸濕，有危厲。過猶不及，盛極而衰。"}],jiezi:[{char:"濟",pinyin:"jì",def:"渡河，既濟即已渡過，事已完成之義。"},{char:"茀",pinyin:"fú",def:"車前的障蔽，遮蔽物之義。"},{char:"繻",pinyin:"xū",def:"絲綢，此指用於塞漏的布料。"},{char:"袽",pinyin:"rú",def:"舊衣破布，用以塞漏之物。"}]},
+  {num:64,name:"未濟",nameEn:"Before Completion",symbol:"䷿",upper:"離（火）",lower:"坎（水）",nature:"宜慎",natureBg:"#e3f0ff",natureColor:"#2b6cb0",keywords:["未完成","希望","謹慎","新機"],gua:"亨，小狐汔濟，濡其尾，無攸利。",guaMeaning:"通達，小狐狸快要渡過，卻浸濕了尾巴，無所利益。",tuan:"未濟亨，柔得中也，小狐汔濟，未出中也，濡其尾，無攸利，不續終也，雖不當位，剛柔應也。",xiang:"火在水上，未濟；君子以慎辨物居方。",yao:[{name:"初六",ci:"濡其尾，吝。",meaning:"浸濕尾巴，有遺憾。"},{name:"九二",ci:"曳其輪，貞吉。",meaning:"拖曳車輪，謹慎守正則吉。"},{name:"六三",ci:"未濟，征凶，利涉大川。",meaning:"尚未完成，出征則凶，但利於渡越大川。"},{name:"九四",ci:"貞吉，悔亡，震用伐鬼方，三年有賞于大國。",meaning:"守正則吉，悔恨消亡，震動用以征伐鬼方，三年後在大國受到賞賜。"},{name:"六五",ci:"貞吉，無悔，君子之光，有孚，吉。",meaning:"守正則吉，無悔，君子的光輝，有誠信，吉祥。"},{name:"上九",ci:"有孚于飲酒，無咎，濡其首，有孚失是。",meaning:"誠信地飲酒慶祝，無過失，若沉溺飲酒頭部被浸濕，誠信便喪失了。"}],jiezi:[{char:"濟",pinyin:"jì",def:"渡河，未濟即尚未渡過，事未完成而前途充滿希望。"},{char:"汔",pinyin:"qì",def:"幾乎，將近之義。"},{char:"辨",pinyin:"biàn",def:"辨別、分辨，此指明辨事物之義。"},{char:"鬼方",pinyin:"guǐ fāng",def:"古代北方部族名，此泛指外患。"}]}
+];
+
+const NATURES = ["大吉","吉","宜守","宜慎","宜學","宜等","宜退","宜觀","宜待"];
+const HUE_MAP = {
+  "大吉":["#f0fff4","#276749"],
+  "吉":["#e8f5fe","#2b6cb0"],
+  "宜守":["#fff8e1","#b7791f"],
+  "宜慎":["#fff5f5","#9b1b30"],
+  "宜學":["#e3f0ff","#2b6cb0"],
+  "宜等":["#fff8e1","#b7791f"],
+  "宜退":["#e3f0ff","#2b6cb0"],
+  "宜觀":["#e3f0ff","#2b6cb0"],
+  "宜待":["#fff8e1","#b7791f"],
+};
+
+let currentFilter = "全部";
+let currentDivYao = [];
+let currentDivStep = 0;
+let currentCoinTosses = [];
+let currentDivResult = null;
+
+function renderGrid(list){
+  const grid = document.getElementById('hex-grid');
+  grid.innerHTML = '';
+  list.forEach(h => {
+    const card = document.createElement('div');
+    card.className = 'hex-card';
+    const [bg,tc] = HUE_MAP[h.nature]||["#f7f7f7","#555"];
+    card.innerHTML = `
+      <span class="hex-symbol">${h.symbol}</span>
+      <div class="hex-num">第 ${h.num} 卦</div>
+      <div class="hex-name">${h.name}</div>
+      <div class="hex-name-en">${h.nameEn}</div>
+      <span class="hex-nature" style="background:${bg};color:${tc}">${h.nature}</span>`;
+    card.onclick = () => openDetail(h);
+    grid.appendChild(card);
+  });
+  document.getElementById('grid-label').textContent =
+    list.length === HEXAGRAMS.length ? `全部六十四卦` : `找到 ${list.length} 卦`;
+}
+
+function filterHex(query){
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? HEXAGRAMS.filter(h =>
+        h.name.includes(query) || h.nameEn.toLowerCase().includes(q) ||
+        String(h.num).includes(q) || h.keywords.some(k=>k.includes(query)) ||
+        h.nature.includes(query)
+      )
+    : HEXAGRAMS;
+  renderGrid(filtered);
+}
+
+function setFilter(nature){
+  currentFilter = nature;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.n===nature));
+  const list = nature==='全部' ? HEXAGRAMS : HEXAGRAMS.filter(h=>h.nature===nature);
+  renderGrid(list);
+}
+
+function renderFilters(){
+  const row = document.getElementById('filter-row');
+  ['全部',...NATURES].forEach(n=>{
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (n==='全部'?' active':'');
+    btn.dataset.n = n;
+    btn.textContent = n;
+    btn.onclick = () => setFilter(n);
+    row.appendChild(btn);
+  });
+}
+
+function openDetail(h){
+  document.getElementById('m-symbol').textContent = h.symbol;
+  document.getElementById('m-num').textContent = `第 ${h.num} 卦`;
+  document.getElementById('m-name').textContent = h.name;
+  document.getElementById('m-name-en').textContent = h.nameEn;
+  document.getElementById('m-trigrams').innerHTML =
+    `<span class="trigram-badge">上卦：${h.upper}</span><span class="trigram-badge">下卦：${h.lower}</span>`;
+
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div class="modal-section">
+      <div class="section-label">卦辭</div>
+      <div class="section-text">${h.gua}</div>
+      <div class="section-sub">${h.guaMeaning}</div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">彖傳</div>
+      <div class="section-text">${h.tuan}</div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">象傳</div>
+      <div class="section-text">${h.xiang}</div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">爻辭</div>
+      <div class="yao-list">${h.yao.map(y=>`
+        <div class="yao-row">
+          <div class="yao-label">${y.name}</div>
+          <div class="yao-content">
+            <div class="yao-ci">${y.ci}</div>
+            <div class="yao-meaning">${y.meaning}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="section-label">說文解字</div>
+      <div class="jiezi-grid">${h.jiezi.map(j=>`
+        <div class="jiezi-item">
+          <div class="jiezi-char">${j.char}</div>
+          <div class="jiezi-pinyin">${j.pinyin}</div>
+          <div class="jiezi-def">${j.def}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('modal-overlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(){
+  document.getElementById('modal-overlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function closeModalOnBg(e){
+  if(e.target===document.getElementById('modal-overlay')) closeModal();
+}
+
+/* ── Divination ── */
+function openDivModal(){
+  resetDiv();
+  document.getElementById('div-modal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeDivModal(){
+  document.getElementById('div-modal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function startDivination(){
+  currentDivYao = [];
+  currentDivStep = 0;
+  currentCoinTosses = [null,null,null];
+  showDivStage(2);
+  updateYaoProgress();
+  updateYaoTitle();
+}
+
+function showDivStage(n){
+  document.querySelectorAll('.div-stage').forEach((s,i)=>{
+    s.classList.toggle('active', i===n-1);
+  });
+}
+
+function updateYaoTitle(){
+  const names = ['初爻','二爻','三爻','四爻','五爻','上爻'];
+  document.getElementById('div-yao-title').textContent = `第 ${currentDivStep+1} 爻（${names[currentDivStep]}）`;
+  currentCoinTosses = [null,null,null];
+  document.getElementById('coin-result-text').textContent = '點擊三枚銅錢各自投擲';
+  ['coin-0','coin-1','coin-2'].forEach(id=>{
+    const c = document.getElementById(id);
+    c.textContent='●'; c.className='coin';
+  });
+  document.getElementById('confirm-yao-btn').disabled = true;
+}
+
+function tossCoin(idx){
+  const coin = document.getElementById(`coin-${idx}`);
+  coin.classList.add('tossing');
+  setTimeout(()=>{
+    coin.classList.remove('tossing');
+    const result = Math.random() < 0.5 ? 'heads' : 'tails';
+    currentCoinTosses[idx] = result;
+    coin.textContent = result==='heads' ? '陽' : '陰';
+    coin.className = 'coin ' + result;
+
+    const allTossed = currentCoinTosses.every(t=>t!==null);
+    if(allTossed){
+      const headsCount = currentCoinTosses.filter(t=>t==='heads').length;
+      let yaoType, yaoLabel;
+      if(headsCount===3) { yaoType='yang'; yaoLabel='老陽（九）— 變爻' }
+      else if(headsCount===2) { yaoType='yang'; yaoLabel='少陽（七）— 陽爻' }
+      else if(headsCount===1) { yaoType='yin'; yaoLabel='少陰（八）— 陰爻' }
+      else { yaoType='yin'; yaoLabel='老陰（六）— 變爻' }
+      document.getElementById('coin-result-text').textContent = yaoLabel;
+      document.getElementById('confirm-yao-btn').disabled = false;
+      document.getElementById('confirm-yao-btn').dataset.yaoType = yaoType;
+    }
+  }, 420);
+}
+
+function confirmYao(){
+  const yaoType = document.getElementById('confirm-yao-btn').dataset.yaoType;
+  currentDivYao.push(yaoType);
+  updateYaoProgress();
+
+  if(currentDivYao.length===6){
+    computeDivResult();
+  } else {
+    currentDivStep++;
+    updateYaoTitle();
+  }
+}
+
+function updateYaoProgress(){
+  const prog = document.getElementById('yao-progress');
+  const names=['初','二','三','四','五','上'];
+  prog.innerHTML = [...Array(6)].map((_,i)=>`
+    <div class="yao-line">
+      <span class="yao-line-label">${names[i]}爻</span>
+      <div class="yao-line-bar ${i<currentDivYao.length?currentDivYao[i]:'empty'}"></div>
+    </div>`).join('');
+}
+
+function computeDivResult(){
+  const yangCount = currentDivYao.filter(y=>y==='yang').length;
+  const seed = currentDivYao.map((y,i)=>y==='yang'?i*3:i).reduce((a,b)=>a+b,0);
+  const hexIdx = seed % 64;
+  currentDivResult = HEXAGRAMS[hexIdx];
+
+  document.getElementById('div-result-symbol').textContent = currentDivResult.symbol;
+  document.getElementById('div-result-name').textContent = `${currentDivResult.num}. ${currentDivResult.name} — ${currentDivResult.nameEn}`;
+  document.getElementById('div-result-meaning').textContent = `卦辭：${currentDivResult.gua}\n\n${currentDivResult.guaMeaning}`;
+
+  showDivStage(3);
+}
+
+function viewFullFromDiv(){
+  closeDivModal();
+  openDetail(currentDivResult);
+}
+
+function resetDiv(){
+  currentDivYao=[];currentDivStep=0;currentCoinTosses=[null,null,null];currentDivResult=null;
+  document.getElementById('div-question').value='';
+  showDivStage(1);
+}
+
+function setView(v){}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeDivModal(); } });
+
+renderFilters();
+renderGrid(HEXAGRAMS);
+</script>
+</body>
+</html>
