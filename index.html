@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -333,6 +334,7 @@ body{
         <button class="tab-btn" onclick="showTab('sz')">說文解字</button>
         <button class="tab-btn" onclick="showTab('notes')">歷代注疏</button>
         <button class="tab-btn" onclick="showTab('sources')">參考文獻</button>
+<button class="tab-btn" onclick="showTab('mynotes')">📝 我的筆記</button>
       </nav>
 
       <!-- Tab: 卦辭與傳 -->
@@ -383,6 +385,42 @@ body{
         </div>
       </div>
     </div>
+
+<div class="tab-content" id="tab-mynotes">
+<!-- Tab: 我的筆記 -->
+
+  <div class="section-block">
+    <div class="sec-label">個人學習筆記</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:12px;font-family:var(--sans)">
+      筆記儲存於您的瀏覽器本地端，可新增多則筆記，重新整理後仍會保留。
+    </div>
+
+    <div id="notes-list" style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px;"></div>
+
+    <div class="sec-label" id="note-editor-title" style="font-size: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-md);">新增一則筆記</div>
+    <textarea id="hexagram-note"
+      placeholder="在這裡輸入您對本卦的理解、心得、占問記錄……"
+      rows="4"
+      style="width:100%;padding:12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--serif);line-height:1.9;resize:vertical;background:var(--bg);color:var(--text);box-sizing:border-box;outline:none;transition:border-color .15s;"
+      onfocus="this.style.borderColor='var(--accent)'"
+      onblur="this.style.borderColor='var(--border-md)'"
+    ></textarea>
+    
+    <div style="margin-top:10px;display:flex;align-items:center;gap:12px;">
+      <button onclick="saveNote()"
+        style="padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">
+        💾 儲存筆記
+      </button>
+      
+      <button id="cancel-edit-btn" onclick="cancelEdit()"
+        style="display:none; padding:8px 20px;background:var(--border-md);color:var(--text);border:none;border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">
+        取消編輯
+      </button>
+
+      <span id="save-status" style="font-size:12px;color:var(--accent2);font-family:var(--sans);"></span>
+    </div>
+  </div>
+</div>
   </main>
 </div>
 
@@ -12304,19 +12342,174 @@ function renderComm(comms){
       <div class="comm-trans">${c.trans}</div>
     </div>`).join('');
 }
-
+// ★ 補回這兩個被不小心刪掉的函式
 function showTab(tab){
   activeTab=tab;
+  const tabs=['gua','yao','sz','notes','sources','mynotes'];
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    const tabs=['gua','yao','sz','notes','sources'];
     b.classList.toggle('active',tabs[i]===tab);
   });
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('show'));
   document.getElementById('tab-'+tab).classList.add('show');
+  
+  // 如果切換到筆記頁，就讀取筆記
+  if(tab==='mynotes') loadNote();
 }
 
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('mobile-show');
+}
+
+// 全域變數：用來追蹤目前正在編輯的筆記 ID（null 代表是「新增」模式）
+let editingNoteId = null;
+
+// ★ 修改：讀取筆記清單
+function loadNote(){
+  if(!currentHex) return;
+  
+  let notes = [];
+  // 為了避免和舊版衝突，使用新的 key 加上 '-list'
+  const notesStr = localStorage.getItem('iching-notes-list-' + currentHex.num);
+  
+  if (notesStr) {
+    notes = JSON.parse(notesStr);
+  } else {
+    // 兼容處理：檢查有沒有舊版的單一筆記，有的話自動轉成第一則筆記
+    const oldNote = localStorage.getItem('iching-note-' + currentHex.num);
+    if (oldNote) {
+      notes = [{
+        id: Date.now(), 
+        text: oldNote, 
+        time: new Date().toLocaleString()
+      }];
+      // 存入新格式，移除舊格式
+      localStorage.setItem('iching-notes-list-' + currentHex.num, JSON.stringify(notes));
+      localStorage.removeItem('iching-note-' + currentHex.num);
+    }
+  }
+
+  renderNotesList(notes);
+  cancelEdit(); // 切換卦象或初次讀取時，確保輸入框是清空的新增狀態
+}
+
+// ★ 新增：渲染筆記列表畫面
+function renderNotesList(notes) {
+  const listContainer = document.getElementById('notes-list');
+  listContainer.innerHTML = ''; // 清空現有列表
+
+  notes.forEach(note => {
+    const noteDiv = document.createElement('div');
+    noteDiv.style.cssText = "padding:16px; border:1px solid var(--border-md); border-radius:8px; background:var(--bg); box-shadow: 0 2px 4px rgba(0,0,0,0.03);";
+
+    // 處理換行符號，讓 textarea 的換行能正確顯示在網頁上
+    const formattedText = note.text.replace(/\n/g, '<br>');
+
+    noteDiv.innerHTML = `
+      <div style="font-size:12px; color:var(--text3); margin-bottom:8px;">🕒 ${note.time || ''}</div>
+      <div style="font-size:14px; font-family:var(--serif); line-height:1.7; color:var(--text); margin-bottom:12px;">${formattedText}</div>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button onclick="editNote(${note.id})" style="padding:4px 12px; font-size:12px; cursor:pointer; background:transparent; border:1px solid var(--accent); color:var(--accent); border-radius:6px; transition:0.2s;">✏️ 編輯</button>
+        <button onclick="deleteNote(${note.id})" style="padding:4px 12px; font-size:12px; cursor:pointer; background:transparent; border:1px solid #d9534f; color:#d9534f; border-radius:6px; transition:0.2s;">🗑️ 刪除</button>
+      </div>
+    `;
+    listContainer.appendChild(noteDiv);
+  });
+}
+
+// ★ 修改：儲存筆記 (包含新增與更新)
+function saveNote(){
+  if(!currentHex) return;
+  const textArea = document.getElementById('hexagram-note');
+  const text = textArea.value.trim();
+
+  if(!text) {
+    alert("請輸入筆記內容喔！");
+    return;
+  }
+
+  const notesStr = localStorage.getItem('iching-notes-list-' + currentHex.num);
+  let notes = notesStr ? JSON.parse(notesStr) : [];
+
+  if (editingNoteId) {
+    // 編輯現有筆記
+    const noteIndex = notes.findIndex(n => n.id === editingNoteId);
+    if (noteIndex !== -1) {
+      notes[noteIndex].text = text;
+      notes[noteIndex].time = new Date().toLocaleString() + ' (已編輯)';
+    }
+  } else {
+    // 新增一則新筆記
+    const newNote = {
+      id: Date.now(), // 用時間戳記當作唯一 ID
+      text: text,
+      time: new Date().toLocaleString()
+    };
+    notes.push(newNote); // 加到陣列尾端
+  }
+
+  // 存回 localStorage
+  localStorage.setItem('iching-notes-list-' + currentHex.num, JSON.stringify(notes));
+
+  const status = document.getElementById('save-status');
+  status.textContent = '✅ 已儲存';
+  setTimeout(() => status.textContent = '', 2000);
+
+  loadNote(); // 重新讀取畫面，這會同時觸發清空輸入框
+}
+
+// ★ 新增：點擊編輯按鈕
+function editNote(id) {
+  if(!currentHex) return;
+  const notesStr = localStorage.getItem('iching-notes-list-' + currentHex.num);
+  if (!notesStr) return;
+  
+  const notes = JSON.parse(notesStr);
+  const noteToEdit = notes.find(n => n.id === id);
+
+  if (noteToEdit) {
+    document.getElementById('hexagram-note').value = noteToEdit.text;
+    editingNoteId = id; // 設定正在編輯的 ID
+    document.getElementById('note-editor-title').textContent = '✏️ 編輯這則筆記';
+    document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+    
+    // 畫面自動捲動並聚焦到輸入框
+    document.getElementById('hexagram-note').focus();
+    document.getElementById('note-editor-title').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// ★ 新增：點擊刪除按鈕
+function deleteNote(id) {
+  if(!currentHex) return;
+  if(!confirm('確定要刪除這則筆記嗎？刪除後無法恢復喔！')) return;
+
+  const notesStr = localStorage.getItem('iching-notes-list-' + currentHex.num);
+  if (!notesStr) return;
+  let notes = JSON.parse(notesStr);
+
+  // 濾掉要刪除的那個 ID
+  notes = notes.filter(n => n.id !== id);
+  localStorage.setItem('iching-notes-list-' + currentHex.num, JSON.stringify(notes));
+
+  // 如果剛好在編輯這則被刪除的筆記，強制跳出編輯模式
+  if (editingNoteId === id) {
+    cancelEdit();
+  } else {
+    loadNote(); // 重新渲染畫面
+  }
+}
+
+// ★ 新增：取消編輯模式，回到新增狀態
+function cancelEdit() {
+  editingNoteId = null;
+  const textArea = document.getElementById('hexagram-note');
+  if(textArea) textArea.value = '';
+  
+  const title = document.getElementById('note-editor-title');
+  if(title) title.textContent = '新增一則筆記';
+  
+  const cancelBtn = document.getElementById('cancel-edit-btn');
+  if(cancelBtn) cancelBtn.style.display = 'none';
 }
 
 init();
