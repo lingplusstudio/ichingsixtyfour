@@ -347,6 +347,11 @@ body{
 <div class="shell">
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
+    <div style="padding:10px 1.1rem;border-bottom:1px solid var(--border)">
+  <button onclick="showDiaryPanel()" style="width:100%;padding:9px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;text-align:left;">
+    📜 卜卦紀錄
+  </button>
+</div>
     <div class="sidebar-search">
       <div class="search-inner">
         <span style="color:var(--text3);font-size:13px">◎</span>
@@ -364,7 +369,79 @@ body{
       <div class="empty-title">選擇一卦開始查詢</div>
       <div class="empty-sub">從左側列表點選任一卦，查看完整學術資料，包含歷代注疏與說文解字。</div>
     </div>
+<!-- 占卦紀錄面板 -->
+<div id="diary-panel" style="display:none;position:fixed;inset:0;top:54px;z-index:200;background:var(--bg);overflow-y:auto;">
+  <div style="max-width:800px;margin:0 auto;padding:2rem 1.5rem 4rem;">
 
+    <!-- 標題列 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;">
+      <div>
+        <div style="font-family:var(--display);font-size:26px;color:var(--text)">📜 卜卦紀錄</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px;font-family:var(--sans)">記錄每一次的占問與感悟</div>
+      </div>
+      <button onclick="hideDiaryPanel()" style="padding:8px 16px;background:var(--bg2);border:1px solid var(--border-md);border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--text2);">
+        ✕ 關閉
+      </button>
+    </div>
+
+    <!-- 新增紀錄表單 -->
+    <div style="background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:1.5rem;margin-bottom:2rem;">
+      <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);font-weight:600;margin-bottom:1rem;">
+        ＋ 新增占卦紀錄
+      </div>
+
+      <!-- 問題 -->
+      <div style="margin-bottom:1rem;">
+        <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">❓ 占問的問題</label>
+        <input id="diary-question" type="text" placeholder="例：此次求職是否順利？"
+          style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--sans);background:var(--bg);color:var(--text);box-sizing:border-box;outline:none;">
+      </div>
+
+      <!-- 本卦 + 變卦 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;">
+        <div>
+          <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">☰ 本卦</label>
+          <select id="diary-hexagram-main"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:13px;font-family:var(--sans);background:var(--bg);color:var(--text);outline:none;">
+            <option value="">請選擇本卦</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">☱ 變卦（無則留空）</label>
+          <select id="diary-hexagram-change"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:13px;font-family:var(--sans);background:var(--bg);color:var(--text);outline:none;">
+            <option value="">無變卦</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 感悟 -->
+      <div style="margin-bottom:1.2rem;">
+        <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">📝 紀錄感悟</label>
+        <textarea id="diary-note" placeholder="占問當時的感受、解讀，或事後的驗證……" rows="4"
+          style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--serif);line-height:1.8;background:var(--bg);color:var(--text);box-sizing:border-box;resize:vertical;outline:none;"></textarea>
+      </div>
+
+      <button onclick="saveDiaryEntry()"
+        style="padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">
+        💾 儲存紀錄
+      </button>
+      <span id="diary-save-status" style="margin-left:12px;font-size:12px;color:var(--accent2);font-family:var(--sans);"></span>
+    </div>
+
+    <!-- 歷史紀錄列表 -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);font-weight:600;">
+          歷史紀錄
+        </div>
+        <div style="font-size:12px;color:var(--text3);font-family:var(--sans);" id="diary-count"></div>
+      </div>
+      <div id="diary-list"></div>
+    </div>
+
+  </div>
+</div>
     <div class="detail" id="detail-panel">
       <div class="detail-hero">
         <div class="detail-top">
@@ -12395,13 +12472,163 @@ const NATURES=["大吉","吉","宜守","宜慎","宜學","宜等","宜退","宜�
 let currentHex=null;
 let activeTab='gua';
 let filterNature='全部';
+/* ══════════════════════════
+   占卦紀錄系統
+   ══════════════════════════ */
 
+function initDiarySelects(){
+  const main = document.getElementById('diary-hexagram-main');
+  const change = document.getElementById('diary-hexagram-change');
+  HEXAGRAMS.forEach(h => {
+    const opt1 = new Option(`${h.symbol} 第${h.num}卦 ${h.name}`, h.num);
+    const opt2 = new Option(`${h.symbol} 第${h.num}卦 ${h.name}`, h.num);
+    main.appendChild(opt1);
+    change.appendChild(opt2);
+  });
+}
+
+function showDiaryPanel(){
+  document.getElementById('diary-panel').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  renderDiaryList();
+}
+
+function hideDiaryPanel(){
+  document.getElementById('diary-panel').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function saveDiaryEntry(){
+  const question = document.getElementById('diary-question').value.trim();
+  const mainNum  = document.getElementById('diary-hexagram-main').value;
+  const changeNum= document.getElementById('diary-hexagram-change').value;
+  const note     = document.getElementById('diary-note').value.trim();
+
+  if(!question){ alert('請填寫占問的問題'); return; }
+  if(!mainNum){  alert('請選擇本卦'); return; }
+
+  const entries = getDiaryEntries();
+  const newEntry = {
+    id: Date.now(),
+    timestamp: new Date().toISOString(),
+    question,
+    mainHex: parseInt(mainNum),
+    changeHex: changeNum ? parseInt(changeNum) : null,
+    note
+  };
+  entries.unshift(newEntry); // 最新的放最前面
+  localStorage.setItem('iching-diary', JSON.stringify(entries));
+
+  // 清空表單
+  document.getElementById('diary-question').value = '';
+  document.getElementById('diary-hexagram-main').value = '';
+  document.getElementById('diary-hexagram-change').value = '';
+  document.getElementById('diary-note').value = '';
+
+  const status = document.getElementById('diary-save-status');
+  status.textContent = '✅ 已儲存';
+  setTimeout(()=> status.textContent = '', 2000);
+
+  renderDiaryList();
+}
+
+function getDiaryEntries(){
+  try {
+    return JSON.parse(localStorage.getItem('iching-diary') || '[]');
+  } catch(e) { return []; }
+}
+
+function deleteDiaryEntry(id){
+  if(!confirm('確定要刪除這筆紀錄？')) return;
+  const entries = getDiaryEntries().filter(e => e.id !== id);
+  localStorage.setItem('iching-diary', JSON.stringify(entries));
+  renderDiaryList();
+}
+
+function formatDate(iso){
+  const d = new Date(iso);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}  ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function renderDiaryList(){
+  const entries = getDiaryEntries();
+  const list = document.getElementById('diary-list');
+  const count = document.getElementById('diary-count');
+  count.textContent = `共 ${entries.length} 筆`;
+
+  if(entries.length === 0){
+    list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text3);font-size:13px;font-family:var(--sans)">
+      還沒有占卦紀錄，試著新增第一筆吧 🌱
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = entries.map(e => {
+    const main   = HEXAGRAMS.find(h => h.num === e.mainHex);
+    const change = e.changeHex ? HEXAGRAMS.find(h => h.num === e.changeHex) : null;
+    if(!main) return '';
+    return `
+    <div style="background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:12px;">
+
+      <!-- 頂部：時間 + 刪除 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span style="font-size:11px;color:var(--text3);font-family:var(--sans);">🕐 ${formatDate(e.timestamp)}</span>
+        <button onclick="deleteDiaryEntry(${e.id})"
+          style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;"
+          onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">
+          ✕ 刪除
+        </button>
+      </div>
+
+      <!-- 問題 -->
+      <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:12px;font-family:var(--sans);">
+        ❓ ${e.question}
+      </div>
+
+      <!-- 卦象圖示 -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+        <button onclick="hideDiaryPanel();openHex(HEXAGRAMS.find(h=>h.num===${main.num}))"
+          style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg);border:1px solid var(--border-md);border-radius:10px;cursor:pointer;transition:all .15s;"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-md)'">
+          <span style="font-size:32px;line-height:1;">${main.symbol}</span>
+          <div style="text-align:left;">
+            <div style="font-size:10px;color:var(--text3);font-family:var(--sans);">本卦</div>
+            <div style="font-size:14px;font-family:var(--serif);color:var(--text);">第${main.num}卦 ${main.name}</div>
+            <span style="font-size:9px;padding:1px 6px;border-radius:6px;background:${main.natureBg};color:${main.natureColor};">${main.nature}</span>
+          </div>
+        </button>
+
+        ${change ? `
+        <span style="font-size:18px;color:var(--text3);">→</span>
+        <button onclick="hideDiaryPanel();openHex(HEXAGRAMS.find(h=>h.num===${change.num}))"
+          style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg);border:1px solid var(--border-md);border-radius:10px;cursor:pointer;transition:all .15s;"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-md)'">
+          <span style="font-size:32px;line-height:1;">${change.symbol}</span>
+          <div style="text-align:left;">
+            <div style="font-size:10px;color:var(--text3);font-family:var(--sans);">變卦</div>
+            <div style="font-size:14px;font-family:var(--serif);color:var(--text);">第${change.num}卦 ${change.name}</div>
+            <span style="font-size:9px;padding:1px 6px;border-radius:6px;background:${change.natureBg};color:${change.natureColor};">${change.nature}</span>
+          </div>
+        </button>` : ''}
+      </div>
+
+      <!-- 感悟 -->
+      ${e.note ? `
+      <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px;">
+        <div style="font-size:11px;color:var(--text3);font-family:var(--sans);margin-bottom:6px;">📝 感悟</div>
+        <div style="font-size:13px;color:var(--text2);font-family:var(--serif);line-height:1.9;white-space:pre-wrap;">${e.note}</div>
+      </div>` : ''}
+
+    </div>`;
+  }).join('');
+}
 function init(){
   const d=new Date();
   document.getElementById('topbar-date').textContent=
     `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
   renderFilters();
   renderList(HEXAGRAMS);
+ initDiarySelects(); // ← 加這行
 }
 
 function renderFilters(){
