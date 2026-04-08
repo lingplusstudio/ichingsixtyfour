@@ -457,16 +457,19 @@ const db = firebase.firestore();
 // 2. 監聽使用者登入狀態
 auth.onAuthStateChanged(user => {
   if (user) {
-    // 已經登入：顯示名字，隱藏登入按鈕，顯示登出按鈕
     document.getElementById('user-name').textContent = `嗨，${user.displayName}`;
     document.getElementById('login-btn').style.display = 'none';
     document.getElementById('logout-btn').style.display = 'inline-block';
-    console.log("使用者已登入:", user.uid);
+    
+    // ★ 新增這行：登入成功後，如果剛好停在筆記頁，就去雲端抓資料
+    if(activeTab === 'mynotes') loadNote(); 
   } else {
-    // 尚未登入：顯示登入按鈕
     document.getElementById('user-name').textContent = '';
     document.getElementById('login-btn').style.display = 'inline-block';
     document.getElementById('logout-btn').style.display = 'none';
+    
+    // ★ 新增這行：登出後，清空畫面上的筆記
+    if(activeTab === 'mynotes') loadNote(); 
   }
 });
 
@@ -12424,39 +12427,45 @@ function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('mobile-show');
 }
 
-// 全域變數：用來追蹤目前正在編輯的筆記 ID（null 代表是「新增」模式）
+// 全域變數
 let editingNoteId = null;
+let currentNotes = []; // 新增一個變數，暫存從雲端抓下來的筆記陣列
 
-// ★ 修改：讀取筆記清單
-function loadNote(){
+// ☁️ 雲端版：讀取筆記
+function loadNote() {
   if(!currentHex) return;
   
-  let notes = [];
-  // 為了避免和舊版衝突，使用新的 key 加上 '-list'
-  const notesStr = localStorage.getItem('iching-notes-list-' + currentHex.num);
-  
-  if (notesStr) {
-    notes = JSON.parse(notesStr);
-  } else {
-    // 兼容處理：檢查有沒有舊版的單一筆記，有的話自動轉成第一則筆記
-    const oldNote = localStorage.getItem('iching-note-' + currentHex.num);
-    if (oldNote) {
-      notes = [{
-        id: Date.now(), 
-        text: oldNote, 
-        time: new Date().toLocaleString()
-      }];
-      // 存入新格式，移除舊格式
-      localStorage.setItem('iching-notes-list-' + currentHex.num, JSON.stringify(notes));
-      localStorage.removeItem('iching-note-' + currentHex.num);
-    }
+  const user = auth.currentUser; // 檢查目前有沒有人登入
+  if (!user) {
+    // 沒登入的話，鎖住畫面不給看也不給寫
+    document.getElementById('notes-list').innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text3);">請先點擊右上角「G 登入」，才能查看與新增雲端筆記喔！</div>';
+    document.getElementById('hexagram-note').disabled = true;
+    document.getElementById('hexagram-note').placeholder = "請先登入...";
+    return;
   }
 
-  renderNotesList(notes);
-  cancelEdit(); // 切換卦象或初次讀取時，確保輸入框是清空的新增狀態
+  // 有登入的話，開放輸入框
+  document.getElementById('hexagram-note').disabled = false;
+  document.getElementById('hexagram-note').placeholder = "在這裡輸入您對本卦的理解、心得、占問記錄……";
+
+  // 去 Firebase 資料庫拿資料：路徑是 users -> [你的UID] -> hexNotes -> [卦象號碼]
+  db.collection('users').doc(user.uid).collection('hexNotes').doc(currentHex.num.toString())
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        currentNotes = doc.data().notes || [];
+      } else {
+        currentNotes = []; // 如果雲端沒這卦的資料，就給個空陣列
+      }
+      renderNotesList(currentNotes);
+      cancelEdit();
+    })
+    .catch((error) => {
+      console.error("讀取雲端筆記失敗:", error);
+    });
 }
 
-// ★ 新增：渲染筆記列表畫面
+// ★ 保留原本的：渲染筆記列表畫面
 function renderNotesList(notes) {
   const listContainer = document.getElementById('notes-list');
   listContainer.innerHTML = ''; // 清空現有列表
@@ -12480,9 +12489,16 @@ function renderNotesList(notes) {
   });
 }
 
-// ★ 修改：儲存筆記 (包含新增與更新)
-function saveNote(){
+// ☁️ 雲端版：儲存筆記
+function saveNote() {
   if(!currentHex) return;
+  
+  const user = auth.currentUser;
+  if (!user) {
+    alert("請先登入才能儲存筆記到雲端喔！");
+    return;
+  }
+
   const textArea = document.getElementById('hexagram-note');
   const text = textArea.value.trim();
 
@@ -12491,79 +12507,76 @@ function saveNote(){
     return;
   }
 
-  const notesStr = localStorage.getItem('iching-notes-list-' + currentHex.num);
-  let notes = notesStr ? JSON.parse(notesStr) : [];
+  const status = document.getElementById('save-status');
+  status.textContent = '⏳ 雲端同步中...';
 
+  // 判斷是編輯還是新增
   if (editingNoteId) {
-    // 編輯現有筆記
-    const noteIndex = notes.findIndex(n => n.id === editingNoteId);
+    const noteIndex = currentNotes.findIndex(n => n.id === editingNoteId);
     if (noteIndex !== -1) {
-      notes[noteIndex].text = text;
-      notes[noteIndex].time = new Date().toLocaleString() + ' (已編輯)';
+      currentNotes[noteIndex].text = text;
+      currentNotes[noteIndex].time = new Date().toLocaleString() + ' (已編輯)';
     }
   } else {
-    // 新增一則新筆記
-    const newNote = {
-      id: Date.now(), // 用時間戳記當作唯一 ID
+    currentNotes.push({
+      id: Date.now(),
       text: text,
       time: new Date().toLocaleString()
-    };
-    notes.push(newNote); // 加到陣列尾端
+    });
   }
 
-  // 存回 localStorage
-  localStorage.setItem('iching-notes-list-' + currentHex.num, JSON.stringify(notes));
-
-  const status = document.getElementById('save-status');
-  status.textContent = '✅ 已儲存';
-  setTimeout(() => status.textContent = '', 2000);
-
-  loadNote(); // 重新讀取畫面，這會同時觸發清空輸入框
+  // 把更新後的陣列，整包寫入 Firebase 資料庫
+  db.collection('users').doc(user.uid).collection('hexNotes').doc(currentHex.num.toString())
+    .set({ notes: currentNotes })
+    .then(() => {
+      status.textContent = '✅ 已同步至雲端';
+      setTimeout(() => status.textContent = '', 2000);
+      loadNote(); // 存檔完重新讀取畫面
+    })
+    .catch((error) => {
+      console.error("雲端儲存失敗:", error);
+      status.textContent = '❌ 儲存失敗';
+    });
 }
 
-// ★ 新增：點擊編輯按鈕
+// ☁️ 雲端版：編輯筆記
 function editNote(id) {
   if(!currentHex) return;
-  const notesStr = localStorage.getItem('iching-notes-list-' + currentHex.num);
-  if (!notesStr) return;
-  
-  const notes = JSON.parse(notesStr);
-  const noteToEdit = notes.find(n => n.id === id);
+  const noteToEdit = currentNotes.find(n => n.id === id);
 
   if (noteToEdit) {
     document.getElementById('hexagram-note').value = noteToEdit.text;
-    editingNoteId = id; // 設定正在編輯的 ID
+    editingNoteId = id;
     document.getElementById('note-editor-title').textContent = '✏️ 編輯這則筆記';
     document.getElementById('cancel-edit-btn').style.display = 'inline-block';
     
-    // 畫面自動捲動並聚焦到輸入框
     document.getElementById('hexagram-note').focus();
     document.getElementById('note-editor-title').scrollIntoView({ behavior: 'smooth' });
   }
 }
 
-// ★ 新增：點擊刪除按鈕
+// ☁️ 雲端版：刪除筆記
 function deleteNote(id) {
   if(!currentHex) return;
-  if(!confirm('確定要刪除這則筆記嗎？刪除後無法恢復喔！')) return;
+  
+  const user = auth.currentUser;
+  if (!user) return;
 
-  const notesStr = localStorage.getItem('iching-notes-list-' + currentHex.num);
-  if (!notesStr) return;
-  let notes = JSON.parse(notesStr);
+  if(!confirm('確定要刪除這則筆記嗎？刪除後雲端資料也會同步移除喔！')) return;
 
-  // 濾掉要刪除的那個 ID
-  notes = notes.filter(n => n.id !== id);
-  localStorage.setItem('iching-notes-list-' + currentHex.num, JSON.stringify(notes));
+  // 濾掉要刪除的那筆
+  currentNotes = currentNotes.filter(n => n.id !== id);
 
-  // 如果剛好在編輯這則被刪除的筆記，強制跳出編輯模式
-  if (editingNoteId === id) {
-    cancelEdit();
-  } else {
-    loadNote(); // 重新渲染畫面
-  }
+  // 把刪除後的結果，覆蓋回 Firebase 雲端
+  db.collection('users').doc(user.uid).collection('hexNotes').doc(currentHex.num.toString())
+    .set({ notes: currentNotes })
+    .then(() => {
+      if (editingNoteId === id) cancelEdit();
+      loadNote(); // 重新讀取畫面
+    });
 }
 
-// ★ 新增：取消編輯模式，回到新增狀態
+// ★ 保留原本的：取消編輯模式
 function cancelEdit() {
   editingNoteId = null;
   const textArea = document.getElementById('hexagram-note');
