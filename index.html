@@ -251,7 +251,50 @@ body{
 }
 .source-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;font-family:var(--sans)}
 .source-desc{font-size:11px;color:var(--text3);line-height:1.6;font-family:var(--sans)}
-
+.relation-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+.rel-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all .15s;
+  min-width: 90px;
+  text-decoration: none;
+}
+.rel-btn:hover {
+  background: rgba(122,92,46,0.06);
+  border-color: var(--accent);
+}
+.rel-btn-label {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: .08em;
+}
+.rel-btn-symbol {
+  font-size: 28px;
+  line-height: 1;
+}
+.rel-btn-name {
+  font-size: 13px;
+  font-family: var(--serif);
+  color: var(--text);
+  font-weight: 500;
+}
+.rel-btn-note {
+  font-size: 10px;
+  color: var(--accent);
+}
 /* Responsive */
 /* 1. 先定義按鈕外觀，並預設在電腦版隱藏 */
 .mob-menu-btn{
@@ -380,9 +423,42 @@ body{
         <div class="sz-grid" id="t-sz-grid"></div>
       </div>
 
-      <!-- Tab: 歷代注疏 -->
+     <!-- Tab: 歷代注疏 -->
       <div class="tab-content" id="tab-notes">
         <div id="t-notes-content"></div>
+      </div>
+
+      <!-- ↓ 新增關聯卦象（放在參考文獻之前） -->
+      <!-- Tab: 關聯卦象 -->
+      <div class="tab-content" id="tab-relations">
+        <div class="section-block">
+          <div class="sec-label">關聯卦象 Related Hexagrams</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.8;font-family:var(--sans);margin-bottom:20px">
+            易經卦象之間有四種對應關係，透過爻的變換互相連結。
+          </div>
+          <div class="relation-grid" id="t-relation-grid"></div>
+        </div>
+        <div class="section-block" style="margin-top:2rem">
+          <div class="sec-label">關係說明</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;font-family:var(--sans);color:var(--text2)">
+            <div style="padding:12px;background:var(--bg);border-radius:8px;line-height:1.7">
+              <strong style="color:var(--accent)">錯卦（旁通）</strong><br>
+              六爻陰陽全部相反，代表相對立的能量，互為參照。
+            </div>
+            <div style="padding:12px;background:var(--bg);border-radius:8px;line-height:1.7">
+              <strong style="color:var(--accent)">綜卦（覆卦）</strong><br>
+              六爻上下顛倒，如同翻轉視角，代表互補的情境。
+            </div>
+            <div style="padding:12px;background:var(--bg);border-radius:8px;line-height:1.7">
+              <strong style="color:var(--accent)">交卦（上下互換）</strong><br>
+              上卦與下卦對調位置，探討主客易位的關係。
+            </div>
+            <div style="padding:12px;background:var(--bg);border-radius:8px;line-height:1.7">
+              <strong style="color:var(--accent)">互卦（核卦）</strong><br>
+              取第2、3、4爻成下卦，第3、4、5爻成上卦，揭示卦象內部隱藏的變化。
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Tab: 參考文獻 -->
@@ -394,8 +470,8 @@ body{
       </div>
     </div>
 
-<div class="tab-content" id="tab-mynotes">
-<!-- Tab: 我的筆記 -->
+    <!-- Tab: 我的筆記 -->
+    <div class="tab-content" id="tab-mynotes">
 
   <div class="section-block">
     <div class="sec-label">個人學習筆記</div>
@@ -493,6 +569,72 @@ function logoutGoogle() {
 /* ═══════════════════════════════════════════
    完整六十四卦資料庫（學術版）
    ═══════════════════════════════════════════ */
+  const RELATIONS = {
+  1:  { cuo: 2,  zong: 1,  jiao: 1,  hu: 1  },  // 乾：錯坤、綜乾、交乾、互乾
+  2:  { cuo: 1,  zong: 2,  jiao: 2,  hu: 2  },  // 坤：錯乾、綜坤、交坤、互坤
+  3:  { cuo: 50, zong: 4,  jiao: 60, hu: 23 },  // 屯
+  4:  { cuo: 49, zong: 3,  jiao: 59, hu: 24 },  // 蒙
+  5:  { cuo: 35, zong: 6,  jiao: 38, hu: 38 },  // 需
+  6:  { cuo: 36, zong: 5,  jiao: 37, hu: 37 },  // 訟
+  7:  { cuo: 13, zong: 8,  jiao: 24, hu: 24 },  // 師
+  8:  { cuo: 14, zong: 7,  jiao: 23, hu: 23 },  // 比
+  9:  { cuo: 16, zong: 10, jiao: 57, hu: 38 },  // 小畜
+  10: { cuo: 15, zong: 9,  jiao: 58, hu: 37 },  // 履
+  11: { cuo: 12, zong: 12, jiao: 12, hu: 54 },  // 泰
+  12: { cuo: 11, zong: 11, jiao: 11, hu: 53 },  // 否
+  13: { cuo: 7,  zong: 14, jiao: 6,  hu: 44 },  // 同人
+  14: { cuo: 8,  zong: 13, jiao: 5,  hu: 43 },  // 大有
+  15: { cuo: 10, zong: 16, jiao: 39, hu: 40 },  // 謙
+  16: { cuo: 9,  zong: 15, jiao: 40, hu: 39 },  // 豫
+  17: { cuo: 18, zong: 18, jiao: 45, hu: 53 },  // 隨
+  18: { cuo: 17, zong: 17, jiao: 46, hu: 54 },  // 蠱
+  19: { cuo: 33, zong: 20, jiao: 54, hu: 24 },  // 臨
+  20: { cuo: 34, zong: 19, jiao: 53, hu: 23 },  // 觀
+  21: { cuo: 48, zong: 22, jiao: 35, hu: 39 },  // 噬嗑
+  22: { cuo: 47, zong: 21, jiao: 36, hu: 40 },  // 賁
+  23: { cuo: 24, zong: 24, jiao: 8,  hu: 2  },  // 剝
+  24: { cuo: 23, zong: 23, jiao: 7,  hu: 2  },  // 復
+  25: { cuo: 26, zong: 26, jiao: 17, hu: 53 },  // 無妄
+  26: { cuo: 25, zong: 25, jiao: 18, hu: 54 },  // 大畜
+  27: { cuo: 28, zong: 28, jiao: 3,  hu: 2  },  // 頤
+  28: { cuo: 27, zong: 27, jiao: 4,  hu: 1  },  // 大過
+  29: { cuo: 30, zong: 29, jiao: 29, hu: 27 },  // 坎
+  30: { cuo: 29, zong: 30, jiao: 30, hu: 28 },  // 離
+  31: { cuo: 41, zong: 32, jiao: 56, hu: 44 },  // 咸
+  32: { cuo: 42, zong: 31, jiao: 55, hu: 43 },  // 恆
+  33: { cuo: 19, zong: 34, jiao: 20, hu: 44 },  // 遯
+  34: { cuo: 20, zong: 33, jiao: 19, hu: 43 },  // 大壯
+  35: { cuo: 5,  zong: 36, jiao: 21, hu: 40 },  // 晉
+  36: { cuo: 6,  zong: 35, jiao: 22, hu: 39 },  // 明夷
+  37: { cuo: 40, zong: 38, jiao: 6,  hu: 64 },  // 家人
+  38: { cuo: 39, zong: 37, jiao: 5,  hu: 63 },  // 睽
+  39: { cuo: 38, zong: 40, jiao: 15, hu: 64 },  // 蹇
+  40: { cuo: 37, zong: 39, jiao: 16, hu: 63 },  // 解
+  41: { cuo: 31, zong: 42, jiao: 37, hu: 24 },  // 損
+  42: { cuo: 32, zong: 41, jiao: 38, hu: 23 },  // 益
+  43: { cuo: 23, zong: 44, jiao: 34, hu: 1  },  // 夬
+  44: { cuo: 24, zong: 43, jiao: 33, hu: 1  },  // 姤
+  45: { cuo: 26, zong: 46, jiao: 17, hu: 53 },  // 萃
+  46: { cuo: 25, zong: 45, jiao: 18, hu: 54 },  // 升
+  47: { cuo: 22, zong: 48, jiao: 29, hu: 37 },  // 困
+  48: { cuo: 21, zong: 47, jiao: 30, hu: 38 },  // 井
+  49: { cuo: 4,  zong: 50, jiao: 55, hu: 44 },  // 革
+  50: { cuo: 3,  zong: 49, jiao: 56, hu: 43 },  // 鼎
+  51: { cuo: 57, zong: 51, jiao: 51, hu: 39 },  // 震
+  52: { cuo: 58, zong: 52, jiao: 52, hu: 40 },  // 艮
+  53: { cuo: 54, zong: 54, jiao: 20, hu: 64 },  // 漸
+  54: { cuo: 53, zong: 53, jiao: 19, hu: 63 },  // 歸妹
+  55: { cuo: 59, zong: 56, jiao: 32, hu: 28 },  // 豐
+  56: { cuo: 60, zong: 55, jiao: 31, hu: 28 },  // 旅
+  57: { cuo: 51, zong: 57, jiao: 57, hu: 38 },  // 巽
+  58: { cuo: 52, zong: 58, jiao: 58, hu: 37 },  // 兌
+  59: { cuo: 55, zong: 60, jiao: 4,  hu: 27 },  // 渙
+  60: { cuo: 56, zong: 59, jiao: 3,  hu: 27 },  // 節
+  61: { cuo: 62, zong: 62, jiao: 10, hu: 27 },  // 中孚
+  62: { cuo: 61, zong: 61, jiao: 9,  hu: 28 },  // 小過
+  63: { cuo: 64, zong: 64, jiao: 64, hu: 64 },  // 既濟
+  64: { cuo: 63, zong: 63, jiao: 63, hu: 63 },  // 未濟
+};
 const HEXAGRAMS = [
   {
     num:1, name:"乾", nameEn:"The Creative · Qian", symbol:"䷀",
