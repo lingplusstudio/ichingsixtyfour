@@ -381,10 +381,11 @@ body{
 
       <nav class="tab-nav" id="tab-nav">
         <button class="tab-btn active" onclick="showTab('gua')">卦辭與傳</button>
-        <button class="tab-btn" onclick="showTab('yao')">六爻爻辭</button>
-        <button class="tab-btn" onclick="showTab('sz')">說文解字</button>
-        <button class="tab-btn" onclick="showTab('notes')">歷代注疏</button>
-        <button class="tab-btn" onclick="showTab('sources')">參考文獻</button>
+<button class="tab-btn" onclick="showTab('yao')">六爻爻辭</button>
+<button class="tab-btn" onclick="showTab('sz')">說文解字</button>
+<button class="tab-btn" onclick="showTab('notes')">歷代注疏</button>
+<button class="tab-btn" onclick="showTab('relations')">關聯卦象</button>
+<button class="tab-btn" onclick="showTab('sources')">參考文獻</button>
 <button class="tab-btn" onclick="showTab('mynotes')">📝 我的筆記</button>
       </nav>
 
@@ -12549,18 +12550,45 @@ function renderComm(comms){
       <div class="comm-trans">${c.trans}</div>
     </div>`).join('');
 }
-// ★ 補回這兩個被不小心刪掉的函式
 function showTab(tab){
-  activeTab=tab;
-  const tabs=['gua','yao','sz','notes','sources','mynotes'];
+  activeTab = tab;
+  const tabs = ['gua','yao','sz','notes','relations','sources','mynotes'];
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{
-    b.classList.toggle('active',tabs[i]===tab);
+    b.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('show'));
   document.getElementById('tab-'+tab).classList.add('show');
-  
-  // 如果切換到筆記頁，就讀取筆記
-  if(tab==='mynotes') loadNote();
+
+  if(tab === 'mynotes') loadNote();
+  if(tab === 'relations') renderRelations();
+}
+
+function renderRelations(){
+  if(!currentHex) return;
+  const rel = RELATIONS[currentHex.num];
+  if(!rel) return;
+  const grid = document.getElementById('t-relation-grid');
+
+  const types = [
+    { key: 'cuo',  label: '錯卦',  note: '旁通·陰陽全反' },
+    { key: 'zong', label: '綜卦',  note: '覆卦·上下顛倒' },
+    { key: 'jiao', label: '交卦',  note: '上下互換' },
+    { key: 'hu',   label: '互卦',  note: '核卦·內蘊之象' },
+  ];
+
+  grid.innerHTML = types.map(t => {
+    const targetNum = rel[t.key];
+    const target = HEXAGRAMS.find(h => h.num === targetNum);
+    if(!target) return '';
+    const isSelf = targetNum === currentHex.num;
+    return `
+      <button class="rel-btn" onclick="openHex(HEXAGRAMS.find(h=>h.num===${targetNum}))">
+        <span class="rel-btn-label">${t.label}</span>
+        <span class="rel-btn-symbol">${target.symbol}</span>
+        <span class="rel-btn-name">${isSelf ? '（即本卦）' : `第${targetNum}卦 ${target.name}`}</span>
+        <span class="rel-btn-note">${t.note}</span>
+      </button>`;
+  }).join('');
 }
 
 function toggleSidebar(){
