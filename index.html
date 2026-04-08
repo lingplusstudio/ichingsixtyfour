@@ -281,36 +281,24 @@ body{
 </style>
 </head>
 <body>
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDYmeQdhwQiFbAudkD_TXW1yogpPoU3KDU",
-    authDomain: "ichingnote.firebaseapp.com",
-    projectId: "ichingnote",
-    storageBucket: "ichingnote.firebasestorage.app",
-    messagingSenderId: "172440934553",
-    appId: "1:172440934553:web:f3f01d87125746937f0008",
-    measurementId: "G-4BCMTSMPW3"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
 <div class="topbar">
   <div class="brand">
     <span class="brand-title">易經六十四卦</span>
     <span class="brand-sub">學術查詢版</span>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
+<div style="display:flex;align-items:center;gap:10px">
     <button class="mob-menu-btn" id="mob-btn" onclick="toggleSidebar()">☰ 卦象列表</button>
+    
+    <button onclick="exportNotes()" style="...">📦 備份筆記</button>
+
+    <button id="login-btn" onclick="loginGoogle()" style="padding:5px 12px; font-size:12px; cursor:pointer; background:#4285F4; border:none; color:#fff; border-radius:20px; font-family:var(--sans);">
+      G 登入
+    </button>
+    <span id="user-name" style="font-size:12px; font-weight:bold; color:var(--accent);"></span>
+    <button id="logout-btn" onclick="logoutGoogle()" style="display:none; padding:5px 12px; font-size:12px; cursor:pointer; background:var(--border-md); border:none; color:var(--text); border-radius:20px;">
+      登出
+    </button>
+    
     <span class="topbar-right" id="topbar-date"></span>
   </div>
 </div>
@@ -445,8 +433,62 @@ body{
 </div>
   </main>
 </div>
-
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script>
+
+// 1. 初始化 Firebase (請把這裡換成你剛剛拿到的 firebaseConfig)
+ const firebaseConfig = {
+    apiKey: "AIzaSyDYmeQdhwQiFbAudkD_TXW1yogpPoU3KDU",
+    authDomain: "ichingnote.firebaseapp.com",
+    projectId: "ichingnote",
+    storageBucket: "ichingnote.firebasestorage.app",
+    messagingSenderId: "172440934553",
+    appId: "1:172440934553:web:f3f01d87125746937f0008",
+    measurementId: "G-4BCMTSMPW3"
+};
+
+// 啟動 Firebase 服務
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// 2. 監聽使用者登入狀態
+auth.onAuthStateChanged(user => {
+  if (user) {
+    // 已經登入：顯示名字，隱藏登入按鈕，顯示登出按鈕
+    document.getElementById('user-name').textContent = `嗨，${user.displayName}`;
+    document.getElementById('login-btn').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'inline-block';
+    console.log("使用者已登入:", user.uid);
+  } else {
+    // 尚未登入：顯示登入按鈕
+    document.getElementById('user-name').textContent = '';
+    document.getElementById('login-btn').style.display = 'inline-block';
+    document.getElementById('logout-btn').style.display = 'none';
+  }
+});
+
+// 3. 點擊登入按鈕執行的函式
+function loginGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .then((result) => {
+      alert("登入成功！歡迎 " + result.user.displayName);
+    })
+    .catch((error) => {
+      console.error("登入失敗:", error);
+      alert("登入失敗，請看開發者工具的 Console 錯誤訊息。");
+    });
+}
+
+// 4. 點擊登出按鈕執行的函式
+function logoutGoogle() {
+  auth.signOut().then(() => {
+    alert("已成功登出！");
+  });
+}
 /* ═══════════════════════════════════════════
    完整六十四卦資料庫（學術版）
    ═══════════════════════════════════════════ */
