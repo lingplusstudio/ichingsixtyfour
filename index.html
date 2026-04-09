@@ -371,9 +371,8 @@ body{
     </div>
 <!-- 占卦紀錄面板 -->
 <div id="diary-panel" style="display:none;position:fixed;inset:0;top:54px;z-index:200;background:var(--bg);overflow-y:auto;">
-  <div style="max-width:800px;margin:0 auto;padding:2rem 1.5rem 4rem;">
+  <div style="max-width:1200px;margin:0 auto;padding:2rem 1.5rem 4rem;">
 
-    <!-- 標題列 -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;">
       <div>
         <div style="font-family:var(--display);font-size:26px;color:var(--text)">📜 卜卦紀錄</div>
@@ -384,85 +383,83 @@ body{
       </button>
     </div>
 
-    <!-- 新增／編輯紀錄表單 -->
-    <div id="diary-form-area" style="background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:1.5rem;margin-bottom:2rem;">
-      <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);font-weight:600;margin-bottom:1rem;">
-        ＋ 新增占卦紀錄
-      </div>
-
-      <!-- 占問時間 -->
-      <div style="margin-bottom:1rem;">
-        <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">🕐 占問時間</label>
-        <input id="diary-datetime" type="datetime-local"
-          style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--sans);background:var(--bg);color:var(--text);box-sizing:border-box;outline:none;">
-      </div>
-
-      <!-- 問題 -->
-      <div style="margin-bottom:1rem;">
-        <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">❓ 占問的問題</label>
-        <input id="diary-question" type="text" placeholder="例：此次求職是否順利？"
-          style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--sans);background:var(--bg);color:var(--text);box-sizing:border-box;outline:none;">
-      </div>
-
-      <!-- 本卦（可新增最多4個） -->
-      <div style="margin-bottom:1rem;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <label style="font-size:12px;color:var(--text2);font-family:var(--sans);">☰ 本卦（最多4卦）</label>
-          <button onclick="addHexRow('main')"
-            style="padding:3px 10px;font-size:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);">
-            ＋ 新增
-          </button>
+    <div style="display:flex; gap:2.5rem; flex-wrap:wrap-reverse; align-items:flex-start;">
+      
+      <div style="flex: 1; min-width: 320px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);font-weight:600;">
+            歷史紀錄
+          </div>
+          <div style="font-size:12px;color:var(--text3);font-family:var(--sans);" id="diary-count"></div>
         </div>
-        <div id="main-hex-rows"></div>
+        <div id="diary-list"></div>
       </div>
 
-      <!-- 變卦（可新增最多4個） -->
-      <div style="margin-bottom:1.2rem;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <label style="font-size:12px;color:var(--text2);font-family:var(--sans);">☱ 變卦（最多4卦，無則留空）</label>
-          <button onclick="addHexRow('change')"
-            style="padding:3px 10px;font-size:11px;background:var(--bg2);color:var(--text2);border:1px solid var(--border-md);border-radius:6px;cursor:pointer;font-family:var(--sans);">
-            ＋ 新增
-          </button>
+      <div style="width: 380px; flex-shrink: 0; flex-grow: 1; max-width: 100%; position: sticky; top: 1rem;">
+        <div id="diary-form-area" style="background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:1.5rem;box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+          <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);font-weight:600;margin-bottom:1rem;">
+            ＋ 編輯占卦紀錄
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">🕐 占問時間</label>
+            <input id="diary-datetime" type="datetime-local"
+              style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--sans);background:var(--bg);color:var(--text);box-sizing:border-box;outline:none;">
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">❓ 占問的問題</label>
+            <input id="diary-question" type="text" placeholder="例：此次求職是否順利？"
+              style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--sans);background:var(--bg);color:var(--text);box-sizing:border-box;outline:none;">
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <label style="font-size:12px;color:var(--text2);font-family:var(--sans);">☰ 本卦（最多4卦）</label>
+              <button onclick="addHexRow('main')"
+                style="padding:3px 10px;font-size:11px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-family:var(--sans);">
+                ＋ 新增
+              </button>
+            </div>
+            <div id="main-hex-rows"></div>
+          </div>
+
+          <div style="margin-bottom:1.2rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <label style="font-size:12px;color:var(--text2);font-family:var(--sans);">☱ 變卦（無則留空）</label>
+              <button onclick="addHexRow('change')"
+                style="padding:3px 10px;font-size:11px;background:var(--bg2);color:var(--text2);border:1px solid var(--border-md);border-radius:6px;cursor:pointer;font-family:var(--sans);">
+                ＋ 新增
+              </button>
+            </div>
+            <div id="change-hex-rows"></div>
+          </div>
+
+          <div style="margin-bottom:1.2rem;">
+            <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">📝 紀錄感悟</label>
+            <textarea id="diary-note" placeholder="占問當時的感受、解讀，或事後的驗證……" rows="4"
+              style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--serif);line-height:1.8;background:var(--bg);color:var(--text);box-sizing:border-box;resize:vertical;outline:none;"></textarea>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <button id="diary-save-btn" onclick="saveDiaryEntry()"
+              style="padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;transition:0.2s;">
+              💾 儲存紀錄
+            </button>
+            <button id="diary-update-btn" onclick="updateDiaryEntry()"
+              style="display:none;padding:10px 24px;background:var(--accent2);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;transition:0.2s;">
+              ✅ 確認更新
+            </button>
+            <button id="diary-cancel-edit-btn" onclick="cancelDiaryEdit()"
+              style="display:none;padding:10px 20px;background:var(--bg2);color:var(--text2);border:1px solid var(--border-md);border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;transition:0.2s;">
+              取消編輯
+            </button>
+            <span id="diary-save-status" style="margin-left:4px;font-size:12px;color:var(--accent2);font-family:var(--sans);"></span>
+          </div>
         </div>
-        <div id="change-hex-rows"></div>
       </div>
 
-      <!-- 感悟 -->
-      <div style="margin-bottom:1.2rem;">
-        <label style="font-size:12px;color:var(--text2);font-family:var(--sans);display:block;margin-bottom:6px;">📝 紀錄感悟</label>
-        <textarea id="diary-note" placeholder="占問當時的感受、解讀，或事後的驗證……" rows="4"
-          style="width:100%;padding:10px 12px;border:1px solid var(--border-md);border-radius:8px;font-size:14px;font-family:var(--serif);line-height:1.8;background:var(--bg);color:var(--text);box-sizing:border-box;resize:vertical;outline:none;"></textarea>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <button id="diary-save-btn" onclick="saveDiaryEntry()"
-          style="padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">
-          💾 儲存紀錄
-        </button>
-        <button id="diary-update-btn" onclick="updateDiaryEntry()"
-          style="display:none;padding:10px 24px;background:var(--accent2);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">
-          ✅ 確認更新
-        </button>
-        <button id="diary-cancel-edit-btn" onclick="cancelDiaryEdit()"
-          style="display:none;padding:10px 20px;background:var(--bg2);color:var(--text2);border:1px solid var(--border-md);border-radius:8px;cursor:pointer;font-family:var(--sans);font-size:13px;">
-          取消編輯
-        </button>
-        <span id="diary-save-status" style="margin-left:4px;font-size:12px;color:var(--accent2);font-family:var(--sans);"></span>
-      </div>
     </div>
-
-    <!-- 歷史紀錄列表 -->
-    <div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-        <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);font-weight:600;">
-          歷史紀錄
-        </div>
-        <div style="font-size:12px;color:var(--text3);font-family:var(--sans);" id="diary-count"></div>
-      </div>
-      <div id="diary-list"></div>
-    </div>
-
   </div>
 </div>
 
