@@ -12996,56 +12996,50 @@ function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('mobile-show');
 }
 
-// 全域變數
+// ==========================================
+// 全域變數區
+// ==========================================
 let editingNoteId = null;
-let currentNotes = []; // 新增一個變數，暫存從雲端抓下來的筆記陣列
+let currentNotes = [];   // 暫存從雲端抓下來的「單一卦象筆記」
+let currentDiaries = []; // 暫存從雲端抓下來的「綜合卜卦紀錄」
 
-// ☁️ 雲端版：讀取筆記
+// ==========================================
+// 【模組 A】雲端版：我的筆記 (單一卦象)
+// ==========================================
 function loadNote() {
   if(!currentHex) return;
-  
-  const user = auth.currentUser; // 檢查目前有沒有人登入
+  const user = auth.currentUser;
   if (!user) {
-    // 沒登入的話，鎖住畫面不給看也不給寫
     document.getElementById('notes-list').innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text3);">請先點擊右上角「G 登入」，才能查看與新增雲端筆記喔！</div>';
     document.getElementById('hexagram-note').disabled = true;
     document.getElementById('hexagram-note').placeholder = "請先登入...";
     return;
   }
 
-  // 有登入的話，開放輸入框
   document.getElementById('hexagram-note').disabled = false;
   document.getElementById('hexagram-note').placeholder = "在這裡輸入您對本卦的理解、心得、占問記錄……";
 
-  // 去 Firebase 資料庫拿資料：路徑是 users -> [你的UID] -> hexNotes -> [卦象號碼]
   db.collection('users').doc(user.uid).collection('hexNotes').doc(currentHex.num.toString())
     .get()
     .then((doc) => {
       if (doc.exists) {
         currentNotes = doc.data().notes || [];
       } else {
-        currentNotes = []; // 如果雲端沒這卦的資料，就給個空陣列
+        currentNotes = [];
       }
       renderNotesList(currentNotes);
       cancelEdit();
     })
-    .catch((error) => {
-      console.error("讀取雲端筆記失敗:", error);
-    });
+    .catch((error) => console.error("讀取雲端筆記失敗:", error));
 }
 
-// ★ 保留原本的：渲染筆記列表畫面
 function renderNotesList(notes) {
   const listContainer = document.getElementById('notes-list');
-  listContainer.innerHTML = ''; // 清空現有列表
-
+  listContainer.innerHTML = '';
   notes.forEach(note => {
     const noteDiv = document.createElement('div');
     noteDiv.style.cssText = "padding:16px; border:1px solid var(--border-md); border-radius:8px; background:var(--bg); box-shadow: 0 2px 4px rgba(0,0,0,0.03);";
-
-    // 處理換行符號，讓 textarea 的換行能正確顯示在網頁上
     const formattedText = note.text.replace(/\n/g, '<br>');
-
     noteDiv.innerHTML = `
       <div style="font-size:12px; color:var(--text3); margin-bottom:8px;">🕒 ${note.time || ''}</div>
       <div style="font-size:14px; font-family:var(--serif); line-height:1.7; color:var(--text); margin-bottom:12px;">${formattedText}</div>
@@ -13058,28 +13052,17 @@ function renderNotesList(notes) {
   });
 }
 
-// ☁️ 雲端版：儲存筆記
 function saveNote() {
   if(!currentHex) return;
-  
   const user = auth.currentUser;
-  if (!user) {
-    alert("請先登入才能儲存筆記到雲端喔！");
-    return;
-  }
-
+  if (!user) { alert("請先登入才能儲存筆記到雲端喔！"); return; }
   const textArea = document.getElementById('hexagram-note');
   const text = textArea.value.trim();
-
-  if(!text) {
-    alert("請輸入筆記內容喔！");
-    return;
-  }
+  if(!text) { alert("請輸入筆記內容喔！"); return; }
 
   const status = document.getElementById('save-status');
   status.textContent = '⏳ 雲端同步中...';
 
-  // 判斷是編輯還是新增
   if (editingNoteId) {
     const noteIndex = currentNotes.findIndex(n => n.id === editingNoteId);
     if (noteIndex !== -1) {
@@ -13087,20 +13070,15 @@ function saveNote() {
       currentNotes[noteIndex].time = new Date().toLocaleString() + ' (已編輯)';
     }
   } else {
-    currentNotes.push({
-      id: Date.now(),
-      text: text,
-      time: new Date().toLocaleString()
-    });
+    currentNotes.push({ id: Date.now(), text: text, time: new Date().toLocaleString() });
   }
 
-  // 把更新後的陣列，整包寫入 Firebase 資料庫
   db.collection('users').doc(user.uid).collection('hexNotes').doc(currentHex.num.toString())
     .set({ notes: currentNotes })
     .then(() => {
       status.textContent = '✅ 已同步至雲端';
       setTimeout(() => status.textContent = '', 2000);
-      loadNote(); // 存檔完重新讀取畫面
+      loadNote();
     })
     .catch((error) => {
       console.error("雲端儲存失敗:", error);
@@ -13108,56 +13086,293 @@ function saveNote() {
     });
 }
 
-// ☁️ 雲端版：編輯筆記
 function editNote(id) {
   if(!currentHex) return;
   const noteToEdit = currentNotes.find(n => n.id === id);
-
   if (noteToEdit) {
     document.getElementById('hexagram-note').value = noteToEdit.text;
     editingNoteId = id;
     document.getElementById('note-editor-title').textContent = '✏️ 編輯這則筆記';
     document.getElementById('cancel-edit-btn').style.display = 'inline-block';
-    
     document.getElementById('hexagram-note').focus();
     document.getElementById('note-editor-title').scrollIntoView({ behavior: 'smooth' });
   }
 }
 
-// ☁️ 雲端版：刪除筆記
 function deleteNote(id) {
   if(!currentHex) return;
-  
   const user = auth.currentUser;
   if (!user) return;
-
   if(!confirm('確定要刪除這則筆記嗎？刪除後雲端資料也會同步移除喔！')) return;
 
-  // 濾掉要刪除的那筆
   currentNotes = currentNotes.filter(n => n.id !== id);
-
-  // 把刪除後的結果，覆蓋回 Firebase 雲端
   db.collection('users').doc(user.uid).collection('hexNotes').doc(currentHex.num.toString())
     .set({ notes: currentNotes })
     .then(() => {
       if (editingNoteId === id) cancelEdit();
-      loadNote(); // 重新讀取畫面
+      loadNote();
     });
 }
 
-// ★ 保留原本的：取消編輯模式
 function cancelEdit() {
   editingNoteId = null;
   const textArea = document.getElementById('hexagram-note');
   if(textArea) textArea.value = '';
-  
   const title = document.getElementById('note-editor-title');
   if(title) title.textContent = '新增一則筆記';
-  
   const cancelBtn = document.getElementById('cancel-edit-btn');
   if(cancelBtn) cancelBtn.style.display = 'none';
 }
 
+
+// ==========================================
+// 【模組 B】雲端版：卜卦紀錄 (跨卦象綜合紀錄)
+// ==========================================
+function showDiaryPanel(){
+  document.getElementById('diary-panel').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  loadDiaries(); // 打開面板時，去雲端抓最新資料
+}
+
+function loadDiaries() {
+  const user = auth.currentUser;
+  if (!user) {
+    document.getElementById('diary-list').innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text3);font-size:13px;font-family:var(--sans)">請先點擊右上角「G 登入」，才能查看與新增雲端占卦紀錄喔！</div>';
+    document.getElementById('diary-count').textContent = '';
+    return;
+  }
+  
+  db.collection('users').doc(user.uid).collection('diaryData').doc('records')
+    .get()
+    .then((doc) => {
+      if (doc.exists) {
+        currentDiaries = doc.data().entries || [];
+      } else {
+        currentDiaries = [];
+      }
+      renderDiaryList();
+    })
+    .catch((error) => console.error("讀取雲端占卜紀錄失敗:", error));
+}
+
+function saveDiaryEntry(){
+  const user = auth.currentUser;
+  if (!user) { alert('請先登入才能儲存紀錄到雲端喔！'); return; }
+
+  const question = document.getElementById('diary-question').value.trim();
+  const datetimeVal = document.getElementById('diary-datetime').value;
+  const note = document.getElementById('diary-note').value.trim();
+  const mainHexes = getHexSelections('main');
+  const changeHexes = getHexSelections('change');
+
+  if(!question){ alert('請填寫占問的問題'); return; }
+  if(!mainHexes.length){ alert('請至少選擇一個本卦'); return; }
+
+  const newEntry = {
+    id: Date.now(),
+    timestamp: datetimeVal ? new Date(datetimeVal).toISOString() : new Date().toISOString(),
+    question,
+    mainHexes,
+    changeHexes,
+    note
+  };
+  
+  currentDiaries.unshift(newEntry); // 加到陣列最前面
+
+  const status = document.getElementById('diary-save-status');
+  status.textContent = '⏳ 雲端同步中...';
+
+  db.collection('users').doc(user.uid).collection('diaryData').doc('records')
+    .set({ entries: currentDiaries })
+    .then(() => {
+      document.getElementById('diary-question').value = '';
+      document.getElementById('diary-note').value = '';
+      initDiaryForm();
+      status.textContent = '✅ 已儲存至雲端';
+      setTimeout(()=> status.textContent = '', 2000);
+      renderDiaryList();
+    });
+}
+
+function editDiaryEntry(id) {
+  const entry = currentDiaries.find(e => e.id === id);
+  if (!entry) return;
+
+  document.getElementById('diary-form-area').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('diary-question').value = entry.question;
+  document.getElementById('diary-note').value = entry.note || '';
+
+  const dt = new Date(entry.timestamp);
+  const localISO = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+  document.getElementById('diary-datetime').value = localISO;
+
+  document.getElementById('main-hex-rows').innerHTML = '';
+  const mainList = entry.mainHexes || (entry.mainHex ? [entry.mainHex] : []);
+  mainList.forEach(() => addHexRow('main'));
+  document.querySelectorAll('#main-hex-rows select').forEach((sel, i) => {
+    if (mainList[i]) sel.value = mainList[i];
+  });
+
+  document.getElementById('change-hex-rows').innerHTML = '';
+  const changeList = entry.changeHexes || (entry.changeHex ? [entry.changeHex] : []);
+  if (changeList.length === 0) {
+    addHexRow('change');
+  } else {
+    changeList.forEach(() => addHexRow('change'));
+    document.querySelectorAll('#change-hex-rows select').forEach((sel, i) => {
+      if (changeList[i]) sel.value = changeList[i];
+    });
+  }
+
+  document.getElementById('diary-save-btn').style.display = 'none';
+  document.getElementById('diary-update-btn').style.display = 'inline-block';
+  document.getElementById('diary-update-btn').dataset.editId = id;
+  document.getElementById('diary-cancel-edit-btn').style.display = 'inline-block';
+}
+
+function updateDiaryEntry() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const btn = document.getElementById('diary-update-btn');
+  const id = parseInt(btn.dataset.editId);
+  const question = document.getElementById('diary-question').value.trim();
+  const datetimeVal = document.getElementById('diary-datetime').value;
+  const note = document.getElementById('diary-note').value.trim();
+  const mainHexes = getHexSelections('main');
+  const changeHexes = getHexSelections('change');
+
+  if(!question){ alert('請填寫占問的問題'); return; }
+  if(!mainHexes.length){ alert('請至少選擇一個本卦'); return; }
+
+  const idx = currentDiaries.findIndex(e => e.id === id);
+  if (idx === -1) return;
+
+  currentDiaries[idx] = {
+    ...currentDiaries[idx],
+    question,
+    timestamp: datetimeVal ? new Date(datetimeVal).toISOString() : currentDiaries[idx].timestamp,
+    mainHexes,
+    changeHexes,
+    note
+  };
+
+  const status = document.getElementById('diary-save-status');
+  status.textContent = '⏳ 雲端同步中...';
+
+  db.collection('users').doc(user.uid).collection('diaryData').doc('records')
+    .set({ entries: currentDiaries })
+    .then(() => {
+      cancelDiaryEdit();
+      renderDiaryList();
+      status.textContent = '✅ 已更新至雲端';
+      setTimeout(()=> status.textContent = '', 2000);
+    });
+}
+
+function deleteDiaryEntry(id){
+  const user = auth.currentUser;
+  if (!user) return;
+  if(!confirm('確定要刪除這筆雲端紀錄嗎？')) return;
+  
+  currentDiaries = currentDiaries.filter(e => e.id !== id);
+  
+  db.collection('users').doc(user.uid).collection('diaryData').doc('records')
+    .set({ entries: currentDiaries })
+    .then(() => {
+      renderDiaryList();
+    });
+}
+
+function renderDiaryList(){
+  const entries = currentDiaries;
+  const list = document.getElementById('diary-list');
+  const count = document.getElementById('diary-count');
+  count.textContent = `共 ${entries.length} 筆`;
+
+  if(entries.length === 0){
+    list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text3);font-size:13px;font-family:var(--sans)">
+      還沒有占卦紀錄，試著新增第一筆吧 🌱
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = entries.map(e => {
+    const mainList = e.mainHexes || (e.mainHex ? [e.mainHex] : []);
+    const changeList = e.changeHexes || (e.changeHex ? [e.changeHex] : []);
+    const mainHexObjs = mainList.map(n => HEXAGRAMS.find(h => h.num === n)).filter(Boolean);
+    const changeHexObjs = changeList.map(n => HEXAGRAMS.find(h => h.num === n)).filter(Boolean);
+
+    const hexCards = (hexes, label) => hexes.map((h, i) => `
+      <button onclick="hideDiaryPanel();openHex(HEXAGRAMS.find(hx=>hx.num===${h.num}))"
+        style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border-md);border-radius:10px;cursor:pointer;transition:all .15s;text-align:left;"
+        onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-md)'">
+        <span style="font-size:28px;line-height:1;">${h.symbol}</span>
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--sans);">${label}${hexes.length > 1 ? ' ' + (i+1) : ''}</div>
+          <div style="font-size:13px;font-family:var(--serif);color:var(--text);">第${h.num}卦 ${h.name}</div>
+          <span style="font-size:9px;padding:1px 6px;border-radius:6px;background:${h.natureBg};color:${h.natureColor};">${h.nature}</span>
+        </div>
+      </button>`).join('');
+
+    return `
+    <div id="diary-entry-${e.id}" style="background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span style="font-size:11px;color:var(--text3);font-family:var(--sans);">🕐 ${formatDate(e.timestamp)}</span>
+        <div style="display:flex;gap:6px;">
+          <button onclick="editDiaryEntry(${e.id})"
+            style="font-size:11px;color:var(--accent);background:none;border:1px solid var(--accent);border-radius:5px;cursor:pointer;padding:2px 8px;">
+            ✏️ 編輯
+          </button>
+          <button onclick="deleteDiaryEntry(${e.id})"
+            style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;"
+            onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">
+            ✕ 刪除
+          </button>
+        </div>
+      </div>
+      <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:12px;font-family:var(--sans);">❓ ${e.question}</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin-bottom:12px;">
+        ${hexCards(mainHexObjs, '本卦')}
+        ${changeHexObjs.length ? `<span style="font-size:18px;color:var(--text3);align-self:center;">→</span>` : ''}
+        ${hexCards(changeHexObjs, '變卦')}
+      </div>
+      ${e.note ? `
+      <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px;">
+        <div style="font-size:11px;color:var(--text3);font-family:var(--sans);margin-bottom:6px;">📝 感悟</div>
+        <div style="font-size:13px;color:var(--text2);font-family:var(--serif);line-height:1.9;white-space:pre-wrap;">${e.note}</div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+
+// ==========================================
+// 補充的 Firebase 登入狀態監聽
+// ==========================================
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('user-name').textContent = `嗨，${user.displayName}`;
+    document.getElementById('login-btn').style.display = 'none';
+    document.getElementById('logout-btn').style.display = 'inline-block';
+    
+    // 登入後：如果有停留在筆記或紀錄畫面，就去雲端抓資料
+    if(activeTab === 'mynotes') loadNote(); 
+    if(document.getElementById('diary-panel').style.display === 'block') loadDiaries();
+  } else {
+    document.getElementById('user-name').textContent = '';
+    document.getElementById('login-btn').style.display = 'inline-block';
+    document.getElementById('logout-btn').style.display = 'none';
+    
+    // 登出後：清空畫面上的私人資料
+    if(activeTab === 'mynotes') loadNote(); 
+    if(document.getElementById('diary-panel').style.display === 'block') loadDiaries();
+  }
+});
+
+// ==========================================
+// 初始化
+// ==========================================
 init();
 </script>
 </body>
