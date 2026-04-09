@@ -13054,62 +13054,63 @@ function deleteDiaryEntry(id){
     });
 }
 
-function renderDiaryList(){
+function renderDiaryList() {
   const entries = currentDiaries;
   const list = document.getElementById('diary-list');
   const count = document.getElementById('diary-count');
   count.textContent = `共 ${entries.length} 筆`;
 
-  if(entries.length === 0){
+  // 💡 1. 把外層容器改成 CSS Grid 排版！
+  list.style.cssText = "display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;";
+
+  if (entries.length === 0) {
+    list.style.display = "block"; // 若沒資料，切回 block 讓空狀態置中
     list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text3);font-size:13px;font-family:var(--sans)">還沒有占卦紀錄，試著新增第一筆吧 🌱</div>`;
     return;
   }
 
   list.innerHTML = entries.map(e => {
+    // 💡 2. 我們只抓「本卦」出來
     const mainList = e.mainHexes || (e.mainHex ? [e.mainHex] : []);
-    const changeList = e.changeHexes || (e.changeHex ? [e.changeHex] : []);
     const mainHexObjs = mainList.map(n => HEXAGRAMS.find(h => h.num === n)).filter(Boolean);
-    const changeHexObjs = changeList.map(n => HEXAGRAMS.find(h => h.num === n)).filter(Boolean);
 
-    const hexCards = (hexes, label) => hexes.map((h, i) => `
-      <button onclick="hideDiaryPanel();openHex(HEXAGRAMS.find(hx=>hx.num===${h.num}))"
-        style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border-md);border-radius:10px;cursor:pointer;transition:all .15s;text-align:left;"
-        onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-md)'">
-        <span style="font-size:28px;line-height:1;">${h.symbol}</span>
-        <div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--sans);">${label}${hexes.length > 1 ? ' ' + (i+1) : ''}</div>
-          <div style="font-size:13px;font-family:var(--serif);color:var(--text);">第${h.num}卦 ${h.name}</div>
-          <span style="font-size:9px;padding:1px 6px;border-radius:6px;background:${h.natureBg};color:${h.natureColor};">${h.nature}</span>
-        </div>
-      </button>`).join('');
+    // 💡 3. 為多個本卦設計「迷你方塊」的顯示方式
+    const hexTags = mainHexObjs.map(h => `
+      <div title="查看 ${h.name}卦" onclick="hideDiaryPanel();openHex(HEXAGRAMS.find(hx=>hx.num===${h.num}))"
+           style="display:flex; flex-direction:column; align-items:center; background:var(--bg); border:1px solid var(--border-md); padding:8px 14px; border-radius:8px; cursor:pointer; transition:0.2s;"
+           onmouseover="this.style.borderColor='var(--accent)'; this.style.backgroundColor='rgba(122,92,46,0.05)'"
+           onmouseout="this.style.borderColor='var(--border-md)'; this.style.backgroundColor='var(--bg)'">
+        <span style="font-size:26px; line-height:1; color:var(--text); margin-bottom:4px;">${h.symbol}</span>
+        <span style="font-size:12px; font-family:var(--serif); font-weight:600; color:var(--text); letter-spacing:0.05em;">${h.name}</span>
+      </div>
+    `).join('');
 
     return `
-    <div id="diary-entry-${e.id}" style="background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <span style="font-size:11px;color:var(--text3);font-family:var(--sans);">🕐 ${formatDate(e.timestamp)}</span>
-        <div style="display:flex;gap:6px;">
-          <button onclick="editDiaryEntry(${e.id})"
-            style="font-size:11px;color:var(--accent);background:none;border:1px solid var(--accent);border-radius:5px;cursor:pointer;padding:2px 8px;">
-            ✏️ 編輯
-          </button>
-          <button onclick="deleteDiaryEntry(${e.id})"
-            style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;"
-            onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">
-            ✕ 刪除
-          </button>
+    <div id="diary-entry-${e.id}" style="background:var(--surface); border:1px solid var(--border-md); border-radius:var(--radius); padding:1.25rem; display:flex; flex-direction:column; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.2s; cursor:default;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-bottom:10px; border-bottom:1px dashed var(--border-md);">
+        <span style="font-size:11px; color:var(--text3); font-family:var(--sans); font-weight:500;">🕐 ${formatDate(e.timestamp)}</span>
+        <div style="display:flex; gap:8px;">
+          <button onclick="editDiaryEntry(${e.id})" style="font-size:12px; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="編輯">✏️</button>
+          <button onclick="deleteDiaryEntry(${e.id})" style="font-size:12px; color:var(--red); background:none; border:none; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="刪除">🗑️</button>
         </div>
       </div>
-      <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:12px;font-family:var(--sans);">❓ ${e.question}</div>
-      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin-bottom:12px;">
-        ${hexCards(mainHexObjs, '本卦')}
-        ${changeHexObjs.length ? `<span style="font-size:18px;color:var(--text3);align-self:center;">→</span>` : ''}
-        ${hexCards(changeHexObjs, '變卦')}
+
+      <div style="font-size:15px; font-weight:600; color:var(--text); margin-bottom:16px; font-family:var(--sans); line-height:1.5; flex-grow:1;">
+        ${e.question}
       </div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        ${hexTags}
+      </div>
+
       ${e.note ? `
-      <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px;">
-        <div style="font-size:11px;color:var(--text3);font-family:var(--sans);margin-bottom:6px;">📝 感悟</div>
-        <div style="font-size:13px;color:var(--text2);font-family:var(--serif);line-height:1.9;white-space:pre-wrap;">${e.note}</div>
+      <div style="background:var(--bg); border-radius:8px; padding:10px 12px; margin-top:auto;">
+        <div style="font-size:12px; color:var(--text2); font-family:var(--serif); line-height:1.7; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;">
+          ${e.note}
+        </div>
       </div>` : ''}
+
     </div>`;
   }).join('');
 }
