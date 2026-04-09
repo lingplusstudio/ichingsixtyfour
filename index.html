@@ -13052,40 +13052,36 @@ function deleteDiaryEntry(id){
     });
 }
 
-function renderDiaryList() {
+function renderDiaryList(){
   const entries = currentDiaries;
   const list = document.getElementById('diary-list');
   const count = document.getElementById('diary-count');
   count.textContent = `共 ${entries.length} 筆`;
 
-  // 💡 1. 把外層容器改成 CSS Grid 排版！
-  list.style.cssText = "display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;";
-
-  if (entries.length === 0) {
-    list.style.display = "block"; // 若沒資料，切回 block 讓空狀態置中
+  if(entries.length === 0){
     list.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text3);font-size:13px;font-family:var(--sans)">還沒有占卦紀錄，試著新增第一筆吧 🌱</div>`;
     return;
   }
 
-  list.innerHTML = entries.map(e => {
-    // 💡 2. 我們只抓「本卦」出來
+  const cardsHTML = entries.map(e => {
     const mainList = e.mainHexes || (e.mainHex ? [e.mainHex] : []);
+    const changeList = e.changeHexes || (e.changeHex ? [e.changeHex] : []);
     const mainHexObjs = mainList.map(n => HEXAGRAMS.find(h => h.num === n)).filter(Boolean);
+    const changeHexObjs = changeList.map(n => HEXAGRAMS.find(h => h.num === n)).filter(Boolean);
 
-    // 💡 3. 為多個本卦設計「迷你方塊」的顯示方式
-    const hexTags = mainHexObjs.map(h => `
+    // 💡 卦象徽章生成器 (小巧精緻)
+    const hexTags = (hexes) => hexes.map(h => `
       <div title="查看 ${h.name}卦" onclick="hideDiaryPanel();openHex(HEXAGRAMS.find(hx=>hx.num===${h.num}))"
-           style="display:flex; flex-direction:column; align-items:center; background:var(--bg); border:1px solid var(--border-md); padding:8px 14px; border-radius:8px; cursor:pointer; transition:0.2s;"
+           style="display:flex; flex-direction:column; align-items:center; background:var(--bg); border:1px solid var(--border-md); padding:6px 12px; border-radius:8px; cursor:pointer; transition:0.2s;"
            onmouseover="this.style.borderColor='var(--accent)'; this.style.backgroundColor='rgba(122,92,46,0.05)'"
            onmouseout="this.style.borderColor='var(--border-md)'; this.style.backgroundColor='var(--bg)'">
-        <span style="font-size:26px; line-height:1; color:var(--text); margin-bottom:4px;">${h.symbol}</span>
-        <span style="font-size:12px; font-family:var(--serif); font-weight:600; color:var(--text); letter-spacing:0.05em;">${h.name}</span>
+        <span style="font-size:24px; line-height:1; color:var(--text); margin-bottom:4px;">${h.symbol}</span>
+        <span style="font-size:11px; font-family:var(--serif); font-weight:600; color:var(--text); letter-spacing:0.05em;">${h.name}</span>
       </div>
     `).join('');
 
     return `
-    <div id="diary-entry-${e.id}" style="background:var(--surface); border:1px solid var(--border-md); border-radius:var(--radius); padding:1.25rem; display:flex; flex-direction:column; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.2s; cursor:default;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-      
+    <div id="diary-entry-${e.id}" style="background:var(--surface); border:1px solid var(--border-md); border-radius:var(--radius); padding:1.25rem; display:flex; flex-direction:column; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-bottom:10px; border-bottom:1px dashed var(--border-md);">
         <span style="font-size:11px; color:var(--text3); font-family:var(--sans); font-weight:500;">🕐 ${formatDate(e.timestamp)}</span>
         <div style="display:flex; gap:8px;">
@@ -13093,24 +13089,24 @@ function renderDiaryList() {
           <button onclick="deleteDiaryEntry(${e.id})" style="font-size:12px; color:var(--red); background:none; border:none; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="刪除">🗑️</button>
         </div>
       </div>
-
       <div style="font-size:15px; font-weight:600; color:var(--text); margin-bottom:16px; font-family:var(--sans); line-height:1.5; flex-grow:1;">
         ${e.question}
       </div>
-
-      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-        ${hexTags}
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; align-items:center;">
+        ${hexTags(mainHexObjs)}
+        ${changeHexObjs.length ? `<span style="font-size:14px; color:var(--text3); margin:0 4px;">→</span> ${hexTags(changeHexObjs)}` : ''}
       </div>
-
       ${e.note ? `
       <div style="background:var(--bg); border-radius:8px; padding:10px 12px; margin-top:auto;">
         <div style="font-size:12px; color:var(--text2); font-family:var(--serif); line-height:1.7; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;">
           ${e.note}
         </div>
       </div>` : ''}
-
     </div>`;
   }).join('');
+
+  // 💡 把組裝好的卡片放進 CSS Grid 網格系統裡
+  list.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">${cardsHTML}</div>`;
 }
 
 function cancelDiaryEdit() {
