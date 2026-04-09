@@ -370,10 +370,10 @@ body{
       <div class="empty-sub">從左側列表點選任一卦，查看完整學術資料，包含歷代注疏與說文解字。</div>
     </div>
 <!-- 占卦紀錄面板 -->
-<div id="diary-panel" style="display:none;position:fixed;inset:0;top:54px;z-index:200;background:var(--bg);overflow-y:auto;">
-  <div style="max-width:1200px;margin:0 auto;padding:2rem 1.5rem 4rem;">
+<div id="diary-panel" style="display:none;position:fixed;inset:0;top:54px;z-index:200;background:var(--bg);overflow:hidden;">
+  <div style="max-width:1200px; height:100%; margin:0 auto; display:flex; flex-direction:column; padding:0 1.5rem;">
 
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.5rem 0 1rem;flex-shrink:0;">
       <div>
         <div style="font-family:var(--display);font-size:26px;color:var(--text)">📜 卜卦紀錄</div>
         <div style="font-size:12px;color:var(--text3);margin-top:4px;font-family:var(--sans)">記錄每一次的占問與感悟</div>
@@ -383,20 +383,21 @@ body{
       </button>
     </div>
 
-    <div style="display:flex; gap:2.5rem; flex-wrap:wrap-reverse; align-items:flex-start;">
+    <div style="display:flex; gap:2.5rem; flex:1; min-height:0; padding-bottom:2rem;">
       
-      <div style="flex: 1; min-width: 320px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div style="flex: 1; min-width: 320px; display:flex; flex-direction:column; height:100%;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-shrink:0;">
           <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);font-weight:600;">
             歷史紀錄
           </div>
           <div style="font-size:12px;color:var(--text3);font-family:var(--sans);" id="diary-count"></div>
         </div>
-        <div id="diary-list"></div>
+        
+        <div id="diary-list" style="overflow-y:auto; flex:1; padding-right:8px; scrollbar-width:thin;"></div>
       </div>
 
-      <div style="width: 380px; flex-shrink: 0; flex-grow: 1; max-width: 100%; position: sticky; top: 1rem;">
-        <div id="diary-form-area" style="background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:1.5rem;box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+      <div style="width: 380px; flex-shrink: 0; display:flex; flex-direction:column; height:100%;">
+        <div id="diary-form-area" style="background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);padding:1.5rem;box-shadow: 0 4px 16px rgba(0,0,0,0.04); overflow-y:auto; scrollbar-width:thin;">
           <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:var(--sans);font-weight:600;margin-bottom:1rem;">
             ＋ 編輯占卦紀錄
           </div>
