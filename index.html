@@ -735,6 +735,9 @@ function logoutGoogle() {
   63: { cuo: 64, zong: 64, jiao: 64, hu: 64 },  // 既濟
   64: { cuo: 63, zong: 63, jiao: 63, hu: 63 },  // 未濟
 };
+  function getElement(str){
+  return str.match(/（(.+?)）/)?.[1] || '';
+}
 const HEXAGRAMS = [
   {
     num:1, name:"乾", nameEn:"The Creative · Qian", symbol:"䷀",
@@ -12545,7 +12548,7 @@ function renderList(list){
       <div class="hex-symbol">${h.symbol}</div>
       <div class="hex-info">
         <div class="hex-num-small">第 ${h.num} 卦</div>
-        <div class="hex-name-small">${h.name}</div>
+        <div class="hex-name-small">${getElement(h.upper)}${getElement(h.lower)}${h.name}</div>
         <div class="hex-en-small">${h.nameEn.split(' · ')[0]}</div>
         <span class="hex-nature-small" style="background:${h.natureBg};color:${h.natureColor}">${h.nature}</span>
       </div>`;
@@ -12567,7 +12570,7 @@ function openHex(h){
 
   document.getElementById('d-symbol').textContent=h.symbol;
   document.getElementById('d-num').textContent=`第 ${h.num} 卦 · ${h.upper} 上 ${h.lower} 下`;
-  document.getElementById('d-name').textContent=h.name;
+ document.getElementById('d-name').textContent=getElement(h.upper)+getElement(h.lower)+h.name;
   document.getElementById('d-name-en').textContent=h.nameEn;
   document.getElementById('d-badges').innerHTML=
     `<span class="badge badge-nature">${h.nature}</span>
