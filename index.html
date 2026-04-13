@@ -295,6 +295,15 @@ body{
   font-size: 10px;
   color: var(--accent);
 }
+  .fs-btn{
+  width:28px;height:28px;border:1px solid var(--border-md);
+  border-radius:6px;background:var(--bg);color:var(--text2);
+  cursor:pointer;font-family:var(--sans);font-size:11px;font-weight:600;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:all .12s;
+}
+.fs-btn:hover{background:var(--bg2);border-color:var(--accent);color:var(--accent);}
+.fs-label{font-size:10px;color:var(--text3);font-family:var(--sans);min-width:20px;text-align:center;}
 /* Responsive */
 /* 1. 先定義按鈕外觀，並預設在電腦版隱藏 */
 .mob-menu-btn{
@@ -330,8 +339,14 @@ body{
     <span class="brand-sub">學術查詢版</span>
   </div>
 <div style="display:flex;align-items:center;gap:10px">
-    <button class="mob-menu-btn" id="mob-btn" onclick="toggleSidebar()">☰ 卦象列表</button>
-    
+  <div style="display:flex;align-items:center;gap:4px;">
+    <button class="fs-btn" onclick="changeFontSize(-1)">A−</button>
+    <span class="fs-label" id="fs-label">中</span>
+    <button class="fs-btn" onclick="changeFontSize(1)">A+</button>
+  </div>
+  <button class="mob-menu-btn" id="mob-btn" onclick="toggleSidebar()">☰ 卦象列表</button>
+  <span class="topbar-right" id="topbar-date"></span>
+   
     <button id="login-btn" onclick="loginGoogle()" style="padding:5px 12px; font-size:12px; cursor:pointer; background:#4285F4; border:none; color:#fff; border-radius:20px; font-family:var(--sans);">
       G 登入
     </button>
@@ -339,9 +354,7 @@ body{
     <button id="logout-btn" onclick="logoutGoogle()" style="display:none; padding:5px 12px; font-size:12px; cursor:pointer; background:var(--border-md); border:none; color:var(--text); border-radius:20px;">
       登出
     </button>
-    
-    <span class="topbar-right" id="topbar-date"></span>
-  </div>
+    </div>
 </div>
 
 <div class="shell">
@@ -12503,13 +12516,35 @@ let filterNature='全部';
 let editingNoteId = null;
 let currentNotes = [];   // 暫存從雲端抓下來的「單一卦象筆記」
 let currentDiaries = []; // 暫存從雲端抓下來的「綜合卜卦紀錄」
+const FS_SIZES = [
+  { label:'小', classic:15, yao:14, base:13 },
+  { label:'中', classic:17, yao:16, base:14 },
+  { label:'大', classic:19, yao:18, base:16 },
+  { label:'特大', classic:22, yao:20, base:18 },
+];
+let fsIndex = parseInt(localStorage.getItem('iching-fs') || '1');
 
+function applyFontSize(){
+  const s = FS_SIZES[fsIndex];
+  document.querySelectorAll('.classic-text').forEach(el => el.style.fontSize = s.classic+'px');
+  document.querySelectorAll('.yao-ci').forEach(el => el.style.fontSize = s.yao+'px');
+  document.querySelectorAll('.translation, .comm-text, .comm-trans, .yao-meaning').forEach(el => el.style.fontSize = s.base+'px');
+  const label = document.getElementById('fs-label');
+  if(label) label.textContent = s.label;
+  localStorage.setItem('iching-fs', fsIndex);
+}
+
+function changeFontSize(dir){
+  fsIndex = Math.max(0, Math.min(FS_SIZES.length - 1, fsIndex + dir));
+  applyFontSize();
+}
 function init(){
   const d=new Date();
   document.getElementById('topbar-date').textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
   renderFilters();
   renderList(HEXAGRAMS);
   initDiaryForm();
+  applyFontSize();
 }
 
 function renderFilters(){
