@@ -12583,7 +12583,7 @@ function renderList(list){
       <div class="hex-symbol">${h.symbol}</div>
       <div class="hex-info">
         <div class="hex-num-small">第 ${h.num} 卦</div>
-        <div class="hex-name-small">${getElement(h.upper)}${getElement(h.lower)}${h.name}</div>
+        <div class="hex-name-small">${(()=>{ const u=getElement(h.upper),l=getElement(h.lower); return u===l ? h.name+'為'+u : u+l+h.name; })()}</div>
         <div class="hex-en-small">${h.nameEn.split(' · ')[0]}</div>
         <span class="hex-nature-small" style="background:${h.natureBg};color:${h.natureColor}">${h.nature}</span>
       </div>`;
@@ -12605,7 +12605,12 @@ function openHex(h){
 
   document.getElementById('d-symbol').textContent=h.symbol;
   document.getElementById('d-num').textContent=`第 ${h.num} 卦 · ${h.upper} 上 ${h.lower} 下`;
- document.getElementById('d-name').textContent=getElement(h.upper)+getElement(h.lower)+h.name;
+const upperEl = getElement(h.upper);
+const lowerEl = getElement(h.lower);
+const fullName = upperEl === lowerEl
+  ? h.name + '為' + upperEl
+  : upperEl + lowerEl + h.name;
+document.getElementById('d-name').textContent = fullName;
   document.getElementById('d-name-en').textContent=h.nameEn;
   document.getElementById('d-badges').innerHTML=
     `<span class="badge badge-nature">${h.nature}</span>
