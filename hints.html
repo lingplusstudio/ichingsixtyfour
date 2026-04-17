@@ -4,147 +4,241 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>解卦靈感庫</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Serif+TC:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    /* 乾淨、極簡的現代感設計 */
+    /* 完美繼承主網站的色彩與字體變數 */
+    :root {
+      --bg: #F8F5F0;
+      --bg2: #EFEBE3;
+      --surface: #FFFFFF;
+      --surface2: rgba(255,255,255,0.7);
+      --border: rgba(0,0,0,0.07);
+      --border-md: rgba(0,0,0,0.13);
+      --border-strong: rgba(0,0,0,0.22);
+      --text: #1A1612;
+      --text2: #5A544E;
+      --text3: #9A9188;
+      --accent: #7A5C2E;
+      --accent2: #4A6741;
+      --red: #8B2020;
+      --radius: 14px;
+      --radius-sm: 7px;
+      --serif: 'Noto Serif TC', 'Songti TC', 'SimSun', 'PMingLiU', serif;
+      --display: 'Noto Serif TC', 'Songti TC', 'SimSun', 'PMingLiU', serif;
+      --sans: 'Noto Serif TC', 'Songti TC', 'SimSun', 'PMingLiU', serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'PingFang TC', '微軟正黑體', sans-serif;
-      background-color: #f9fafb;
-      color: #333;
-      padding: 20px;
-      max-width: 600px;
-      margin: 0 auto;
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      padding: 3rem 1.5rem;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
     }
-    h1 {
-      font-size: 24px;
-      color: #111;
-      border-bottom: 2px solid #e5e7eb;
-      padding-bottom: 10px;
+
+    .container {
+      width: 100%;
+      max-width: 460px;
     }
-    .select-container {
-      margin: 20px 0;
+
+    .header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-md);
+      padding-bottom: 1rem;
     }
+
+    .title {
+      font-family: var(--display);
+      font-size: 22px;
+      color: var(--text);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 6px;
+      letter-spacing: .06em;
+      font-family: var(--sans);
+    }
+
+    .select-wrap {
+      margin-bottom: 2rem;
+    }
+
     select {
       width: 100%;
-      padding: 12px;
-      font-size: 18px;
-      border: 1px solid #d1d5db;
+      padding: 14px 16px;
+      border: 1px solid var(--border-md);
       border-radius: 8px;
-      background-color: #fff;
+      font-size: 15px;
+      font-family: var(--serif);
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
       cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: all 0.2s ease;
+      appearance: none; /* 隱藏原生箭頭以求極簡 */
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239A9188%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem top 50%;
+      background-size: 0.65rem auto;
     }
+
+    select:focus, select:hover {
+      border-color: var(--accent);
+    }
+
     .tip-card {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      display: none; /* 預設隱藏，選了卦才顯示 */
-      margin-top: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-md);
+      border-radius: var(--radius);
+      padding: 1.8rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      display: none; /* 預設隱藏 */
+      animation: fadeIn 0.3s ease;
     }
-    .tip-item {
-      margin-bottom: 16px;
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .tip-title {
-      font-weight: bold;
-      color: #4b5563;
-      display: block;
-      margin-bottom: 4px;
+
+    .sec-block {
+      margin-bottom: 1.5rem;
     }
+
+    .sec-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .sec-label {
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--text3);
+      font-weight: 600;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
     .tip-content {
-      color: #1f2937;
-      font-size: 16px;
-      line-height: 1.5;
+      font-family: var(--serif);
+      font-size: 15px;
+      color: var(--text2);
+      line-height: 1.8;
+    }
+
+    .tip-content.highlight {
+      color: var(--text);
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
 
-  <h1>💡 專屬解卦靈感庫</h1>
-  
-  <div class="select-container">
-    <select id="guaSelect">
-    <option value="" disabled selected>請選擇卦象...</option>
-      <option value="第1卦 乾為天">第1卦 乾為天 ䷀</option>
-      <option value="第2卦 坤為地">第2卦 坤為地 ䷁</option>
-      <option value="第3卦 水雷屯">第3卦 水雷屯 ䷂</option>
-      <option value="第4卦 山水蒙">第4卦 山水蒙 ䷃</option>
-      <option value="第5卦 水天需">第5卦 水天需 ䷄</option>
-      <option value="第6卦 天水訟">第6卦 天水訟 ䷅</option>
-      <option value="第7卦 地水師">第7卦 地水師 ䷆</option>
-      <option value="第8卦 水地比">第8卦 水地比 ䷇</option>
-      <option value="第9卦 風天小畜">第9卦 風天小畜 ䷈</option>
-      <option value="第10卦 天澤履">第10卦 天澤履 ䷉</option>
-      <option value="第11卦 地天泰">第11卦 地天泰 ䷊</option>
-      <option value="第12卦 天地否">第12卦 天地否 ䷋</option>
-      <option value="第13卦 天火同人">第13卦 天火同人 ䷌</option>
-      <option value="第14卦 火天大有">第14卦 火天大有 ䷍</option>
-      <option value="第15卦 地山謙">第15卦 地山謙 ䷎</option>
-      <option value="第16卦 雷地豫">第16卦 雷地豫 ䷏</option>
-      <option value="第17卦 澤雷隨">第17卦 澤雷隨 ䷐</option>
-      <option value="第18卦 山風蠱">第18卦 山風蠱 ䷑</option>
-      <option value="第19卦 地澤臨">第19卦 地澤臨 ䷒</option>
-      <option value="第20卦 風地觀">第20卦 風地觀 ䷓</option>
-      <option value="第28卦 澤風大過">第28卦 澤風大過 ䷛</option>
-      <option value="第30卦 離為火">第30卦 離為火 ䷝</option>
-      <option value="第21卦 火雷噬嗑">第21卦 火雷噬嗑 ䷔</option>
-      <option value="第22卦 山火賁">第22卦 山火賁 ䷕</option>
-      <option value="第23卦 山地剝">第23卦 山地剝 ䷖</option>
-      <option value="第24卦 地雷復">第24卦 地雷復 ䷗</option>
-      <option value="第25卦 天雷無妄">第25卦 天雷無妄 ䷘</option>
-      <option value="第26卦 山天大畜">第26卦 山天大畜 ䷙</option>
-      <option value="第27卦 山雷頤">第27卦 山雷頤 ䷚</option>
-      <option value="第28卦 澤風大過">第28卦 澤風大過 ䷛</option>
-      <option value="第29卦 坎為水">第29卦 坎為水 ䷜</option>
-      <option value="第30卦 離為火">第30卦 離為火 ䷝</option>
-      <option value="第31卦 澤山咸">第31卦 澤山咸 ䷞</option>
-      <option value="第32卦 雷風恆">第32卦 雷風恆 ䷟</option>
-      <option value="第33卦 天山遯">第33卦 天山遯 ䷠</option>
-      <option value="第34卦 雷天大壯">第34卦 雷天大壯 ䷡</option>
-      <option value="第35卦 火地晉">第35卦 火地晉 ䷢</option>
-      <option value="第36卦 地火明夷">第36卦 地火明夷 ䷣</option>
-      <option value="第37卦 風火家人">第37卦 風火家人 ䷤</option>
-      <option value="第38卦 火澤睽">第38卦 火澤睽 ䷥</option>
-      <option value="第39卦 水山蹇">第39卦 水山蹇 ䷦</option>
-      <option value="第40卦 雷水解">第40卦 雷水解 ䷧</option>
-      <option value="第41卦 山澤損">第41卦 山澤損 ䷨</option>
-      <option value="第42卦 風雷益">第42卦 風雷益 ䷩</option>
-      <option value="第43卦 澤天夬">第43卦 澤天夬 ䷪</option>
-      <option value="第44卦 天風姤">第44卦 天風姤 ䷫</option>
-      <option value="第45卦 澤地萃">第45卦 澤地萃 ䷬</option>
-      <option value="第46卦 地風升">第46卦 地風升 ䷭</option>
-      <option value="第47卦 澤水困">第47卦 澤水困 ䷮</option>
-      <option value="第48卦 水風井">第48卦 水風井 ䷯</option>
-      <option value="第49卦 澤火革">第49卦 澤火革 ䷰</option>
-      <option value="第50卦 火風鼎">第50卦 火風鼎 ䷱</option>
-      <option value="第51卦 震為雷">第51卦 震為雷 ䷲</option>
-      <option value="第52卦 艮為山">第52卦 艮為山 ䷳</option>
-      <option value="第53卦 風山漸">第53卦 風山漸 ䷴</option>
-      <option value="第54卦 雷澤歸妹">第54卦 雷澤歸妹 ䷵</option>
-      <option value="第55卦 雷火豐">第55卦 雷火豐 ䷶</option>
-      <option value="第56卦 火山旅">第56卦 火山旅 ䷷</option>
-      <option value="第57卦 巽為風">第57卦 巽為風 ䷸</option>
-      <option value="第58卦 兌為澤">第58卦 兌為澤 ䷹</option>
-      <option value="第59卦 風水渙">第59卦 風水渙 ䷺</option>
-      <option value="第60卦 水澤節">第60卦 水澤節 ䷻</option>
-      <option value="第61卦 風澤中孚">第61卦 風澤中孚 ䷼</option>
-      <option value="第62卦 雷山小過">第62卦 雷山小過 ䷽</option>
-      <option value="第63卦 水火既濟">第63卦 水火既濟 ䷾</option>
-      <option value="第64卦 火水未濟">第64卦 火水未濟 ䷿</option>
+  <div class="container">
+    <div class="header">
+      <div class="title">💡 解卦靈感庫</div>
+      <div class="subtitle">輸入卦名，快速擷取破局策略與心理學對應</div>
+    </div>
+    
+    <div class="select-wrap">
+      <select id="guaSelect">
+        <option value="" disabled selected>請選擇占問卦象...</option>
+        <option value="第1卦 乾為天">第1卦 乾為天 ䷀</option>
+        <option value="第2卦 坤為地">第2卦 坤為地 ䷁</option>
+        <option value="第3卦 水雷屯">第3卦 水雷屯 ䷂</option>
+        <option value="第4卦 山水蒙">第4卦 山水蒙 ䷃</option>
+        <option value="第5卦 水天需">第5卦 水天需 ䷄</option>
+        <option value="第6卦 天水訟">第6卦 天水訟 ䷅</option>
+        <option value="第7卦 地水師">第7卦 地水師 ䷆</option>
+        <option value="第8卦 水地比">第8卦 水地比 ䷇</option>
+        <option value="第9卦 風天小畜">第9卦 風天小畜 ䷈</option>
+        <option value="第10卦 天澤履">第10卦 天澤履 ䷉</option>
+        <option value="第11卦 地天泰">第11卦 地天泰 ䷊</option>
+        <option value="第12卦 天地否">第12卦 天地否 ䷋</option>
+        <option value="第13卦 天火同人">第13卦 天火同人 ䷌</option>
+        <option value="第14卦 火天大有">第14卦 火天大有 ䷍</option>
+        <option value="第15卦 地山謙">第15卦 地山謙 ䷎</option>
+        <option value="第16卦 雷地豫">第16卦 雷地豫 ䷏</option>
+        <option value="第17卦 澤雷隨">第17卦 澤雷隨 ䷐</option>
+        <option value="第18卦 山風蠱">第18卦 山風蠱 ䷑</option>
+        <option value="第19卦 地澤臨">第19卦 地澤臨 ䷒</option>
+        <option value="第20卦 風地觀">第20卦 風地觀 ䷓</option>
+        <option value="第21卦 火雷噬嗑">第21卦 火雷噬嗑 ䷔</option>
+        <option value="第22卦 山火賁">第22卦 山火賁 ䷕</option>
+        <option value="第23卦 山地剝">第23卦 山地剝 ䷖</option>
+        <option value="第24卦 地雷復">第24卦 地雷復 ䷗</option>
+        <option value="第25卦 天雷無妄">第25卦 天雷無妄 ䷘</option>
+        <option value="第26卦 山天大畜">第26卦 山天大畜 ䷙</option>
+        <option value="第27卦 山雷頤">第27卦 山雷頤 ䷚</option>
+        <option value="第28卦 澤風大過">第28卦 澤風大過 ䷛</option>
+        <option value="第29卦 坎為水">第29卦 坎為水 ䷜</option>
+        <option value="第30卦 離為火">第30卦 離為火 ䷝</option>
+        <option value="第31卦 澤山咸">第31卦 澤山咸 ䷞</option>
+        <option value="第32卦 雷風恆">第32卦 雷風恆 ䷟</option>
+        <option value="第33卦 天山遯">第33卦 天山遯 ䷠</option>
+        <option value="第34卦 雷天大壯">第34卦 雷天大壯 ䷡</option>
+        <option value="第35卦 火地晉">第35卦 火地晉 ䷢</option>
+        <option value="第36卦 地火明夷">第36卦 地火明夷 ䷣</option>
+        <option value="第37卦 風火家人">第37卦 風火家人 ䷤</option>
+        <option value="第38卦 火澤睽">第38卦 火澤睽 ䷥</option>
+        <option value="第39卦 水山蹇">第39卦 水山蹇 ䷦</option>
+        <option value="第40卦 雷水解">第40卦 雷水解 ䷧</option>
+        <option value="第41卦 山澤損">第41卦 山澤損 ䷨</option>
+        <option value="第42卦 風雷益">第42卦 風雷益 ䷩</option>
+        <option value="第43卦 澤天夬">第43卦 澤天夬 ䷪</option>
+        <option value="第44卦 天風姤">第44卦 天風姤 ䷫</option>
+        <option value="第45卦 澤地萃">第45卦 澤地萃 ䷬</option>
+        <option value="第46卦 地風升">第46卦 地風升 ䷭</option>
+        <option value="第47卦 澤水困">第47卦 澤水困 ䷮</option>
+        <option value="第48卦 水風井">第48卦 水風井 ䷯</option>
+        <option value="第49卦 澤火革">第49卦 澤火革 ䷰</option>
+        <option value="第50卦 火風鼎">第50卦 火風鼎 ䷱</option>
+        <option value="第51卦 震為雷">第51卦 震為雷 ䷲</option>
+        <option value="第52卦 艮為山">第52卦 艮為山 ䷳</option>
+        <option value="第53卦 風山漸">第53卦 風山漸 ䷴</option>
+        <option value="第54卦 雷澤歸妹">第54卦 雷澤歸妹 ䷵</option>
+        <option value="第55卦 雷火豐">第55卦 雷火豐 ䷶</option>
+        <option value="第56卦 火山旅">第56卦 火山旅 ䷷</option>
+        <option value="第57卦 巽為風">第57卦 巽為風 ䷸</option>
+        <option value="第58卦 兌為澤">第58卦 兌為澤 ䷹</option>
+        <option value="第59卦 風水渙">第59卦 風水渙 ䷺</option>
+        <option value="第60卦 水澤節">第60卦 水澤節 ䷻</option>
+        <option value="第61卦 風澤中孚">第61卦 風澤中孚 ䷼</option>
+        <option value="第62卦 雷山小過">第62卦 雷山小過 ䷽</option>
+        <option value="第63卦 水火既濟">第63卦 水火既濟 ䷾</option>
+        <option value="第64卦 火水未濟">第64卦 火水未濟 ䷿</option>
       </select>
-  </div>
+    </div>
 
-  <div id="tipCard" class="tip-card">
-    <div class="tip-item">
-      <span class="tip-title">🎥 自然意象：</span>
-      <span id="displayImage" class="tip-content"></span>
+    <div id="tipCard" class="tip-card">
+      <div class="sec-block">
+        <div class="sec-label">🎥 物理畫面與自然意象</div>
+        <div id="displayImage" class="tip-content highlight"></div>
+      </div>
+      <div class="sec-block">
+        <div class="sec-label">🎯 破局點與策略</div>
+        <div id="displayStrategy" class="tip-content"></div>
+      </div>
+      <div class="sec-block">
+        <div class="sec-label">🧠 現代心理學對應</div>
+        <div id="displayPsychology" class="tip-content"></div>
+      </div>
     </div>
-    <div class="tip-item">
-      <span class="tip-title">🎯 破局策略：</span>
-      <span id="displayStrategy" class="tip-content"></span>
-    </div>
-    <div class="tip-item">
-      <span class="tip-title">🧠 現代心理學對應：</span>
-      <span id="displayPsychology" class="tip-content"></span>
-    </div>
+
   </div>
 
   <script src="hexagramData.js"></script>
@@ -153,7 +247,6 @@
     const guaSelect = document.getElementById('guaSelect');
     const tipCard = document.getElementById('tipCard');
     
-    // 當選單改變時觸發
     guaSelect.addEventListener('change', function() {
       const selectedGua = this.value;
       const tips = hexagramTips[selectedGua]; // 從資料庫抓資料
