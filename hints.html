@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>解卦靈感庫</title>
+  <style>
+    /* 乾淨、極簡的現代感設計 */
+    body {
+      font-family: 'PingFang TC', '微軟正黑體', sans-serif;
+      background-color: #f9fafb;
+      color: #333;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 24px;
+      color: #111;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+    .select-container {
+      margin: 20px 0;
+    }
+    select {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background-color: #fff;
+      cursor: pointer;
+    }
+    .tip-card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      display: none; /* 預設隱藏，選了卦才顯示 */
+      margin-top: 20px;
+    }
+    .tip-item {
+      margin-bottom: 16px;
+    }
+    .tip-title {
+      font-weight: bold;
+      color: #4b5563;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .tip-content {
+      color: #1f2937;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>💡 專屬解卦靈感庫</h1>
+  
+  <div class="select-container">
+    <select id="guaSelect">
+      <option value="" disabled selected>請選擇卦象...</option>
+      <option value="天風姤">天風姤 ䷫</option>
+      <option value="澤風大過">澤風大過 ䷛</option>
+      <option value="水雷屯">水雷屯 ䷂</option>
+      <option value="離為火">離為火 ䷝</option>
+      </select>
+  </div>
+
+  <div id="tipCard" class="tip-card">
+    <div class="tip-item">
+      <span class="tip-title">🎥 自然意象：</span>
+      <span id="displayImage" class="tip-content"></span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-title">🎯 破局策略：</span>
+      <span id="displayStrategy" class="tip-content"></span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-title">🧠 現代心理學對應：</span>
+      <span id="displayPsychology" class="tip-content"></span>
+    </div>
+  </div>
+
+  <script src="hexagramData.js"></script>
+
+  <script>
+    const guaSelect = document.getElementById('guaSelect');
+    const tipCard = document.getElementById('tipCard');
+    
+    // 當選單改變時觸發
+    guaSelect.addEventListener('change', function() {
+      const selectedGua = this.value;
+      const tips = hexagramTips[selectedGua]; // 從資料庫抓資料
+
+      if (tips) {
+        document.getElementById('displayImage').innerText = tips.image;
+        document.getElementById('displayStrategy').innerText = tips.strategy;
+        document.getElementById('displayPsychology').innerText = tips.psychology;
+        tipCard.style.display = 'block'; // 顯示卡片
+      } else {
+        document.getElementById('displayImage').innerText = "提示建置中...";
+        document.getElementById('displayStrategy').innerText = "提示建置中...";
+        document.getElementById('displayPsychology').innerText = "提示建置中...";
+        tipCard.style.display = 'block';
+      }
+    });
+  </script>
+
+</body>
+</html>
