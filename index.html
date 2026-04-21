@@ -44,61 +44,43 @@ body{
   overflow-x:hidden;
 }
 
-/* ── Topbar ── 修改版 */
+/* ── Topbar 相關修改 ── */
 .topbar {
-  background: rgba(248, 245, 240, 0.95);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-md);
-  height: 54px; 
-  padding: 0 1rem; /* 改小邊距，從 2rem 縮小到 1rem，釋放更多空間給文字 */
+  /* 確保高度足夠容納兩行字，或者移除固定高度改用 min-height */
+  height: auto; 
+  min-height: 54px; 
+  padding: 8px 15px; /* 縮小內邊距，騰出空間 */
   display: flex;
-  align-items: center;
+  align-items: center; 
   justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
 
 .brand {
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  min-width: 0; /* 確保容器可以縮小 */
+  flex-direction: column; /* 讓主標題和副標題上下排列 */
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 80px; /* 給標題一個最小寬度，防止被擠成一格一格的 */
+  flex-shrink: 0;   /* 防止標題被右邊內容擠壓 */
 }
 
 .brand-title {
   font-family: var(--display);
   font-size: 18px;
+  line-height: 1.3;     /* 設定行高，防止字體上下重疊 */
   color: var(--text);
-  font-weight: 400;
-  white-space: nowrap; /* 關鍵：強制文字不換行 */
-  flex-shrink: 0;      /* 關鍵：防止標題被右側內容擠壓變窄 */
+  font-weight: 500;
+  width: 3.5em;         /* 關鍵：限制寬度大約只有三個字的空間 */
+  word-break: break-all; /* 強制換行 */
+  display: block;
 }
 
 .brand-sub {
   font-size: 10px;
   color: var(--text3);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.topbar-right {
-  font-size: 11px;
-  color: var(--text3);
-  letter-spacing: .04em;
-  white-space: nowrap;
-  margin-left: 10px;
-}
-
-/* 針對小螢幕（如 iPhone SE）的額外優化 */
-@media (max-width: 380px) {
-  .brand-title {
-    font-size: 16px; /* 螢幕真的很小時，微調字體大小 */
-  }
-  .brand-sub {
-    display: none;   /* 隱藏副標題，確保主標題「易經六十四卦」絕對能看見 */
-  }
+  writing-mode: horizontal-tb; /* 確保副標題是橫向的 */
+  transform: scale(0.9);      /* 如果覺得副標題太大，可以微調 */
+  transform-origin: left;
 }
 
 /* ── Layout ── */
