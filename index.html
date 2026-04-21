@@ -13101,6 +13101,9 @@ function deleteDiaryEntry(id){
     });
 }
 
+// ==========================================
+// 替換這整個 renderDiaryList 函數
+// ==========================================
 function renderDiaryList(){
   const entries = currentDiaries;
   const list = document.getElementById('diary-list');
@@ -13120,7 +13123,7 @@ function renderDiaryList(){
 
     // 💡 卦象徽章生成器 (小巧精緻)
     const hexTags = (hexes) => hexes.map(h => `
-      <div title="查看 ${h.name}卦" onclick="hideDiaryPanel();openHex(HEXAGRAMS.find(hx=>hx.num===${h.num}))"
+      <div title="查看 ${h.name}卦" onclick="event.stopPropagation(); hideDiaryPanel(); openHex(HEXAGRAMS.find(hx=>hx.num===${h.num}))"
            style="display:flex; flex-direction:column; align-items:center; background:var(--bg); border:1px solid var(--border-md); padding:6px 12px; border-radius:8px; cursor:pointer; transition:0.2s;"
            onmouseover="this.style.borderColor='var(--accent)'; this.style.backgroundColor='rgba(122,92,46,0.05)'"
            onmouseout="this.style.borderColor='var(--border-md)'; this.style.backgroundColor='var(--bg)'">
@@ -13130,12 +13133,12 @@ function renderDiaryList(){
     `).join('');
 
     return `
-    <div id="diary-entry-${e.id}" style="background:var(--surface); border:1px solid var(--border-md); border-radius:var(--radius); padding:1.25rem; display:flex; flex-direction:column; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+    <div id="diary-entry-${e.id}" onclick="viewDiaryEntry(${e.id})" style="cursor:pointer; background:var(--surface); border:1px solid var(--border-md); border-radius:var(--radius); padding:1.25rem; display:flex; flex-direction:column; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-bottom:10px; border-bottom:1px dashed var(--border-md);">
         <span style="font-size:11px; color:var(--text3); font-family:var(--sans); font-weight:500;">🕐 ${formatDate(e.timestamp)}</span>
         <div style="display:flex; gap:8px;">
-          <button onclick="editDiaryEntry(${e.id})" style="font-size:12px; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="編輯">✏️</button>
-          <button onclick="deleteDiaryEntry(${e.id})" style="font-size:12px; color:var(--red); background:none; border:none; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="刪除">🗑️</button>
+          <button onclick="event.stopPropagation(); editDiaryEntry(${e.id})" style="font-size:12px; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="編輯">✏️</button>
+          <button onclick="event.stopPropagation(); deleteDiaryEntry(${e.id})" style="font-size:12px; color:var(--red); background:none; border:none; cursor:pointer; padding:0; opacity:0.6; transition:0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'" title="刪除">🗑️</button>
         </div>
       </div>
       <div style="font-size:15px; font-weight:600; color:var(--text); margin-bottom:16px; font-family:var(--sans); line-height:1.5; flex-grow:1;">
@@ -13154,17 +13157,7 @@ function renderDiaryList(){
     </div>`;
   }).join('');
 
-  // 💡 把組裝好的卡片放進 CSS Grid 網格系統裡
   list.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">${cardsHTML}</div>`;
-}
-
-function cancelDiaryEdit() {
-  initDiaryForm();
-  document.getElementById('diary-question').value = '';
-  document.getElementById('diary-note').value = '';
-  document.getElementById('diary-save-btn').style.display = 'inline-block';
-  document.getElementById('diary-update-btn').style.display = 'none';
-  document.getElementById('diary-cancel-edit-btn').style.display = 'none';
 }
 
 
@@ -13190,6 +13183,88 @@ auth.onAuthStateChanged(user => {
 });
 
 init();
+// 打開大版面檢視
+function viewDiaryEntry(id) {
+  const entry = currentDiaries.find(e => e.id === id);
+  if (!entry) return;
+
+  const modal = document.getElementById('diary-modal');
+  const content = document.getElementById('diary-modal-content');
+
+  // 準備卦象標籤
+  const mainList = entry.mainHexes || (entry.mainHex ? [entry.mainHex] : []);
+  const changeList = entry.changeHexes || (entry.changeHex ? [entry.changeHex] : []);
+  const mainHexObjs = mainList.map(n => HEXAGRAMS.find(h => h.num === n)).filter(Boolean);
+  const changeHexObjs = changeList.map(n => HEXAGRAMS.find(h => h.num === n)).filter(Boolean);
+
+  const hexTags = (hexes) => hexes.map(h => `<span style="display:inline-block; margin-right:8px; margin-bottom:8px; padding:6px 12px; background:var(--bg2); border:1px solid var(--border-md); border-radius:6px; font-size:15px; font-family:var(--serif); color:var(--text);">${h.symbol} ${h.name}</span>`).join('');
+
+  // 組合視窗內容
+  let html = `
+    <div style="font-size:13px; color:var(--text3); font-family:var(--sans); margin-bottom:12px;">🕐 占問時間：${formatDate(entry.timestamp)}</div>
+    <h2 style="font-size:22px; color:var(--text); margin-bottom:20px; font-family:var(--sans); line-height:1.5;">❓ ${entry.question}</h2>
+    
+    <div style="margin-bottom:16px;">
+      <div style="font-size:12px; color:var(--text2); margin-bottom:6px; font-family:var(--sans);">☰ 本卦：</div>
+      <div>${hexTags(mainHexObjs)}</div>
+    </div>
+  `;
+
+  if (changeHexObjs.length > 0) {
+    html += `
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px; color:var(--text2); margin-bottom:6px; font-family:var(--sans);">☱ 變卦：</div>
+        <div>${hexTags(changeHexObjs)}</div>
+      </div>
+    `;
+  }
+
+  if (entry.note) {
+    html += `
+      <div style="margin-top:24px; padding-top:20px; border-top:1px dashed var(--border-md);">
+        <div style="font-size:12px; color:var(--accent); font-weight:600; letter-spacing:0.05em; margin-bottom:10px; font-family:var(--sans);">📝 感悟與驗證：</div>
+        <div style="font-size:16px; color:var(--text); font-family:var(--serif); line-height:1.9; white-space:pre-wrap;">${entry.note}</div>
+      </div>
+    `;
+  } else {
+    html += `<div style="margin-top:24px; padding-top:20px; border-top:1px dashed var(--border-md); font-size:14px; color:var(--text3); font-style:italic;">尚無感悟筆記。</div>`;
+  }
+
+  content.innerHTML = html;
+
+  // 綁定「編輯此紀錄」按鈕的動作
+  const editBtn = document.getElementById('diary-modal-edit-btn');
+  editBtn.onclick = function() {
+    closeDiaryModal(); // 先關閉彈窗
+    editDiaryEntry(id); // 載入右側表單
+  };
+
+  // 顯示彈窗
+  modal.style.display = 'flex';
+}
+
+// 關閉大版面檢視
+function closeDiaryModal() {
+  document.getElementById('diary-modal').style.display = 'none';
+}
+
+// 點擊視窗外的暗色背景也能關閉
+window.addEventListener('click', function(event) {
+  const modal = document.getElementById('diary-modal');
+  if (event.target === modal) {
+    closeDiaryModal();
+  }
+});
 </script>
+<div id="diary-modal" style="display:none; position:fixed; z-index:3000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div style="background:var(--surface); width:90%; max-width:600px; max-height:85vh; border-radius:var(--radius); padding:2.5rem; box-shadow:0 10px 40px rgba(0,0,0,0.2); overflow-y:auto; position:relative;">
+    <button onclick="closeDiaryModal()" style="position:absolute; right:20px; top:20px; background:none; border:none; font-size:28px; cursor:pointer; color:var(--text3); transition:0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">&times;</button>
+    <div id="diary-modal-content">
+      </div>
+    <div style="margin-top:2rem; text-align:right; border-top:1px solid var(--border-md); padding-top:1.5rem;">
+      <button id="diary-modal-edit-btn" style="padding:10px 24px; background:var(--accent); color:#fff; border:none; border-radius:8px; cursor:pointer; font-family:var(--sans); font-size:14px; font-weight:500; transition:0.2s;">✏️ 編輯此紀錄</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
