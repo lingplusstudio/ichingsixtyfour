@@ -44,19 +44,62 @@ body{
   overflow-x:hidden;
 }
 
-/* ── Topbar ── */
-.topbar{
-  background:rgba(248,245,240,0.95);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border-md);
-  height:54px;padding:0 2rem;
-  display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
+/* ── Topbar ── 修改版 */
+.topbar {
+  background: rgba(248, 245, 240, 0.95);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-md);
+  height: 54px; 
+  padding: 0 1rem; /* 改小邊距，從 2rem 縮小到 1rem，釋放更多空間給文字 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-.brand{display:flex;align-items:baseline;gap:10px}
-.brand-title{font-family:var(--display);font-size:18px;color:var(--text);font-weight:400}
-.brand-sub{font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase}
-.topbar-right{font-size:11px;color:var(--text3);letter-spacing:.04em}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0; /* 確保容器可以縮小 */
+}
+
+.brand-title {
+  font-family: var(--display);
+  font-size: 18px;
+  color: var(--text);
+  font-weight: 400;
+  white-space: nowrap; /* 關鍵：強制文字不換行 */
+  flex-shrink: 0;      /* 關鍵：防止標題被右側內容擠壓變窄 */
+}
+
+.brand-sub {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.topbar-right {
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: .04em;
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+/* 針對小螢幕（如 iPhone SE）的額外優化 */
+@media (max-width: 380px) {
+  .brand-title {
+    font-size: 16px; /* 螢幕真的很小時，微調字體大小 */
+  }
+  .brand-sub {
+    display: none;   /* 隱藏副標題，確保主標題「易經六十四卦」絕對能看見 */
+  }
+}
 
 /* ── Layout ── */
 .shell{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 54px)}
