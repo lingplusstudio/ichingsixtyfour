@@ -12,7 +12,7 @@
 :root {
   --parchment:  #f2e8d0;
   --parchment-lt: #faf4e6;
-  --ink:        #1c0f05;
+  --ink:        #332b26;
   --ink-soft:   #3d2810;
   --ink-faint:  #7a5c3e;
   --vermillion: #8b1a1a;
@@ -21,8 +21,8 @@
   --gold-pale:  #e8c870;
   --seal-red:   #c0392b;
   --divider:    rgba(139,106,26,0.25);
-  --ui-bg:      #1a1008;
-  --ui-panel:   #241508;
+  --ui-bg:      #2c241b;
+  --ui-panel:   #382e25;
   --ui-border:  rgba(184,134,11,0.2);
   --ui-gold:    #b8860b;
   --ui-text:    #e8d8b0;
@@ -63,7 +63,7 @@ body { font-family: 'Noto Serif TC', serif; color: var(--ink); min-height: 100vh
 /* Global Editor Controls */
 .editor-controls {
   position: fixed; top: 56px; left: 0; right: 0; z-index: 999;
-  background: rgba(36, 21, 8, 0.95); border-bottom: 1px solid var(--ui-border);
+  rgba(56, 46, 37, 0.95); border-bottom: 1px solid var(--ui-border);
   padding: 12px 24px; display: flex; gap: 24px; align-items: center; justify-content: center;
   backdrop-filter: blur(4px);
 }
@@ -219,7 +219,7 @@ select.field-select:hover { background-color: rgba(184,134,11,0.07); }
 .advice-list li [contenteditable] { flex: 1; }
 
 /* TEACHER NOTE & FOOTER */
-.teacher-note { background: var(--ink); color: var(--parchment); padding: 40px 48px; position: relative; margin: 0 24px 24px; }
+.teacher-note { background: #3b322a; color: var(--parchment); padding: 40px 48px; position: relative; margin: 0 24px 24px; }
 .teacher-note::before { content: '』'; position: absolute; top: 20px; right: 32px; font-family: 'Ma Shan Zheng', cursive; font-size: 80px; color: rgba(255,255,255,0.04); }
 .teacher-note-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 4px; color: var(--gold-pale); text-transform: uppercase; margin-bottom: 20px; display: block; }
 .teacher-note-text { font-size: 14px; line-height: 2.6; color: rgba(242,232,208,0.85); font-weight: 300; font-style: italic; max-width: 600px; }
