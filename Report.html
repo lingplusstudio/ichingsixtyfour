@@ -10,9 +10,10 @@
    GLOBAL
 ============================================================ */
 :root {
+  /* ...（上半部保留原本的紙張跟墨色設定）... */
   --parchment:  #f2e8d0;
   --parchment-lt: #faf4e6;
-  --ink:        #332b26;
+  --ink:        #1c0f05;
   --ink-soft:   #3d2810;
   --ink-faint:  #7a5c3e;
   --vermillion: #8b1a1a;
@@ -21,14 +22,15 @@
   --gold-pale:  #e8c870;
   --seal-red:   #c0392b;
   --divider:    rgba(139,106,26,0.25);
-  --ui-bg:      #2c241b;
-  --ui-panel:   #382e25;
-  --ui-border:  rgba(184,134,11,0.2);
+
+  /* ⬇️ 從這裡開始替換：把 UI 介面改成明亮色系 */
+  --ui-bg:      #faf8f5; /* 整個網頁的淺米灰背景 */
+  --ui-panel:   #ffffff; /* 上方工具列的純白底色 */
+  --ui-border:  rgba(139,106,26,0.2);
   --ui-gold:    #b8860b;
-  --ui-text:    #e8d8b0;
+  --ui-text:    #3d2810; /* 工具列文字改為深褐色 */
   --ui-muted:   #7a6040;
 }
-
 * { margin:0; padding:0; box-sizing:border-box; }
 html { background: var(--ui-bg); }
 body { font-family: 'Noto Serif TC', serif; color: var(--ink); min-height: 100vh; }
@@ -240,10 +242,23 @@ select.field-select:hover { background-color: rgba(184,134,11,0.07); }
 .del-row-btn:hover { color: var(--vermillion); }
 
 @media print {
+  /* 隱藏網頁預設的頁首（日期/標題）與頁尾（網址/頁碼） */
+  @page { margin: 0; }
+
+  /* 強制瀏覽器印出背景顏色（保留米黃色紙張） */
+  body, .page {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .toolbar, .editor-controls, .add-row-btn, .del-row-btn { display: none !important; }
-  html { background: white; }
-  .page-wrap { padding-top: 0; padding-bottom: 0; }
-  .page { margin: 0; box-shadow: none; max-width: 100%; }
+  
+  html { background: var(--parchment); }
+  
+  /* 設定列印時的安全邊距，避免內容被裁切 */
+  .page-wrap { padding: 10mm; } 
+  .page { margin: 0 auto; box-shadow: none; max-width: 100%; }
+  
   [contenteditable] { background: transparent !important; box-shadow: none !important; }
   select.field-select { background-image: none !important; padding-right: 0 !important; }
 }
