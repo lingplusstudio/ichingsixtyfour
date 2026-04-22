@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>易問堂 — 解卦報告編輯器</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700;900&family=Ma+Shan+Zheng&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   GLOBAL
+============================================================ */
+:root {
+  --parchment:  #f2e8d0;
+  --parchment-lt: #faf4e6;
+  --ink:        #1c0f05;
+  --ink-soft:   #3d2810;
+  --ink-faint:  #7a5c3e;
+  --vermillion: #8b1a1a;
+  --gold:       #b8860b;
+  --gold-lt:    #d4a520;
+  --gold-pale:  #e8c870;
+  --seal-red:   #c0392b;
+  --divider:    rgba(139,106,26,0.25);
+  --ui-bg:      #1a1008;
+  --ui-panel:   #241508;
+  --ui-border:  rgba(184,134,11,0.2);
+  --ui-gold:    #b8860b;
+  --ui-text:    #e8d8b0;
+  --ui-muted:   #7a6040;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { background: var(--ui-bg); }
+body { font-family: 'Noto Serif TC', serif; color: var(--ink); min-height: 100vh; }
+
+/* ============================================================
+   EDITOR TOOLBAR & CONTROLS (no-print)
+============================================================ */
+.toolbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: var(--ui-panel); border-bottom: 1px solid var(--ui-border);
+  display: flex; align-items: center; padding: 0 24px; height: 56px; gap: 16px;
+}
+.toolbar-logo { font-family: 'Ma Shan Zheng', cursive; font-size: 22px; color: var(--ui-gold); margin-right: 8px; flex-shrink: 0; }
+.toolbar-label { font-size: 11px; letter-spacing: 3px; color: var(--ui-muted); flex-shrink: 0; }
+.toolbar-sep { flex: 1; }
+.toolbar-hint { font-size: 11px; color: var(--ui-muted); letter-spacing: 1px; }
+
+.btn-print {
+  background: var(--ui-gold); color: var(--ink); border: none; padding: 10px 24px;
+  font-family: 'Noto Serif TC', serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 3px; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0;
+}
+.btn-print:hover { background: var(--gold-lt); transform: translateY(-1px); }
+
+.btn-clear {
+  background: transparent; color: var(--ui-muted); border: 1px solid var(--ui-border);
+  padding: 9px 18px; font-family: 'Noto Serif TC', serif; font-size: 11px;
+  letter-spacing: 2px; cursor: pointer; transition: all 0.2s ease;
+}
+.btn-clear:hover { border-color: var(--seal-red); color: var(--seal-red); }
+
+/* Global Editor Controls */
+.editor-controls {
+  position: fixed; top: 56px; left: 0; right: 0; z-index: 999;
+  background: rgba(36, 21, 8, 0.95); border-bottom: 1px solid var(--ui-border);
+  padding: 12px 24px; display: flex; gap: 24px; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.editor-controls label { color: var(--ui-gold); font-size: 12px; letter-spacing: 1px; }
+.editor-controls select {
+  background: var(--ui-bg); color: var(--ui-text); border: 1px solid var(--ui-border);
+  padding: 6px 12px; font-family: 'Noto Serif TC', serif; border-radius: 4px;
+  outline: none; cursor: pointer; font-size: 13px;
+}
+.editor-controls select:focus { border-color: var(--ui-gold); }
+
+/* ============================================================
+   PAGE WRAPPER
+============================================================ */
+.page-wrap { padding-top: 120px; padding-bottom: 60px; }
+.page {
+  position: relative; max-width: 860px; margin: 0 auto; background: var(--parchment);
+  box-shadow: 0 0 0 1px rgba(100,60,10,0.2), 0 0 0 8px rgba(100,60,10,0.06), 0 0 0 9px rgba(100,60,10,0.12), 0 30px 80px rgba(0,0,0,0.5);
+}
+.page::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(139,106,26,0.04) 28px, rgba(139,106,26,0.04) 29px);
+  pointer-events: none; z-index: 0;
+}
+.border-frame { position: relative; margin: 24px; border: 1px solid rgba(139,106,26,0.4); z-index: 1; }
+.border-frame::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(139,106,26,0.2); pointer-events: none; }
+
+/* Corner ornaments */
+.corner { position: absolute; width: 32px; height: 32px; z-index: 2; }
+.corner svg { width:100%; height:100%; }
+.corner.tl { top:-2px; left:-2px; }
+.corner.tr { top:-2px; right:-2px; transform:scaleX(-1); }
+.corner.bl { bottom:-2px; left:-2px; transform:scaleY(-1); }
+.corner.br { bottom:-2px; right:-2px; transform:scale(-1); }
+
+/* ============================================================
+   EDITABLE FIELDS
+============================================================ */
+[contenteditable] { outline: none; border-radius: 2px; transition: background 0.2s, box-shadow 0.2s; cursor: text; position: relative; }
+[contenteditable]:hover { background: rgba(184,134,11,0.07); }
+[contenteditable]:focus { background: rgba(184,134,11,0.12); box-shadow: 0 0 0 2px rgba(184,134,11,0.35); }
+[contenteditable]:empty::before { content: attr(data-ph); color: rgba(122,92,62,0.45); pointer-events: none; font-style: italic; }
+
+select.field-select {
+  appearance: none; background: transparent; border: none; outline: none;
+  font-family: 'Noto Serif TC', serif; font-size: inherit; color: inherit; cursor: pointer;
+  padding-right: 20px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23b8860b'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0px center; border-radius: 2px; transition: background-color 0.2s;
+}
+select.field-select:hover { background-color: rgba(184,134,11,0.07); }
+
+/* ============================================================
+   REPORT HEADER & META
+============================================================ */
+.report-header { padding: 48px 56px 36px; text-align: center; border-bottom: 1px solid var(--divider); }
+.studio-name { font-family: 'Ma Shan Zheng', cursive; font-size: 13px; letter-spacing: 10px; color: var(--gold); margin-bottom: 16px; display: block; }
+.report-title-en { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 6px; color: var(--ink-faint); text-transform: uppercase; margin-bottom: 20px; display: block; }
+.header-divider { display: flex; align-items: center; gap: 16px; margin: 16px 0; justify-content: center; }
+.header-divider::before, .header-divider::after { content: ''; flex: 1; max-width: 120px; height: 1px; }
+.header-divider::before { background: linear-gradient(to right, transparent, var(--gold)); }
+.header-divider::after { background: linear-gradient(to left, transparent, var(--gold)); }
+.header-divider span { color: var(--gold); font-size: 18px; }
+
+.meta-bar { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--divider); }
+.meta-item { padding: 16px 20px; border-right: 1px solid var(--divider); text-align: center; }
+.meta-item:last-child { border-right: none; }
+.meta-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px; color: var(--ink-faint); text-transform: uppercase; margin-bottom: 6px; display: block; }
+.meta-value { font-size: 13px; font-weight: 600; color: var(--ink-soft); letter-spacing: 1px; min-width: 60px; display: inline-block; }
+
+/* ============================================================
+   DYNAMIC HEXAGRAM HERO
+============================================================ */
+.hexagram-hero {
+  padding: 48px 56px; border-bottom: 1px solid var(--divider);
+  background: linear-gradient(135deg, rgba(184,134,11,0.04) 0%, transparent 60%);
+  position: relative;
+}
+.seal {
+  position: absolute; right: 56px; top: 48px; width: 64px; height: 64px;
+  border: 2px solid var(--seal-red); display: flex; align-items: center; justify-content: center;
+  transform: rotate(-8deg); opacity: 0.75;
+}
+.seal::before { content: ''; position: absolute; inset: 3px; border: 1px solid var(--seal-red); }
+.seal-text { font-family: 'Ma Shan Zheng', cursive; font-size: 18px; color: var(--seal-red); text-align: center; line-height: 1.2; writing-mode: vertical-rl; letter-spacing: 2px; }
+
+/* Grid for multiple hexagrams */
+.hex-display-grid { display: flex; gap: 40px; margin-top: 10px; flex-wrap: wrap; }
+.hex-card { display: flex; gap: 32px; align-items: flex-start; flex: 1; min-width: 250px; }
+
+/* Lines Visual */
+.hexagram-visual { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.hex-lines-group { display: flex; flex-direction: column; gap: 7px; margin-bottom: 6px; }
+.hex-line-row { display: flex; align-items: center; gap: 6px; }
+.yang .hex-line-seg { width: 72px; height: 7px; background: var(--ink); border-radius: 1px; }
+.yin .hex-line-seg { width: 31px; height: 7px; background: var(--ink); border-radius: 1px; }
+.hex-number { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px; color: var(--ink-faint); margin-top: 12px; }
+
+/* Name & Text */
+.hexagram-name-block { text-align: left; flex: 1; }
+.hex-card-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 4px; color: var(--gold); margin-bottom: 12px; display: block; }
+.hex-name-zh { font-family: 'Ma Shan Zheng', cursive; font-size: 48px; color: var(--ink); line-height: 1; margin-bottom: 16px; display: block; }
+.hex-guaci { font-size: 14px; color: var(--ink-soft); line-height: 2.2; border-left: 3px solid var(--gold); padding-left: 16px; font-style: italic; }
+.hex-guaci .source { display: block; font-size: 11px; color: var(--ink-faint); margin-top: 8px; font-style: normal; letter-spacing: 2px; }
+
+/* ============================================================
+   CONTENT SECTIONS
+============================================================ */
+.content-area { padding: 0 56px 56px; }
+.section-block { padding: 40px 0; border-bottom: 1px solid var(--divider); }
+.section-block:last-child { border-bottom: none; }
+.section-head { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.section-icon { font-family: 'Ma Shan Zheng', cursive; font-size: 28px; color: var(--gold); flex-shrink: 0; width: 44px; height: 44px; border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; background: rgba(184,134,11,0.05); }
+.section-heading { flex: 1; }
+.section-title-zh { font-family: 'Ma Shan Zheng', cursive; font-size: 22px; color: var(--ink); display: block; line-height: 1; }
+.section-title-en { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 4px; color: var(--ink-faint); text-transform: uppercase; display: block; margin-top: 4px; }
+.section-rule { flex: 1; height: 1px; background: linear-gradient(to right, var(--divider), transparent); }
+
+.body-text { font-size: 14px; line-height: 2.4; color: var(--ink-soft); }
+.body-text p { margin-bottom: 16px; }
+.body-text p:last-child { margin-bottom: 0; }
+
+.callout { background: rgba(184,134,11,0.06); border: 1px solid rgba(184,134,11,0.2); border-left: 4px solid var(--gold); padding: 20px 24px; margin: 20px 0; }
+.callout-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; display: block; margin-bottom: 8px; }
+.callout p { font-size: 13px; line-height: 2.2; color: var(--ink-soft); }
+
+/* YAO TABLE */
+.yao-group { margin-bottom: 24px; } /* 原本 32px，稍微縮減組與組之間的距離 */
+.yao-group:last-child { margin-bottom: 0; }
+.yao-group-title { font-family: 'Ma Shan Zheng', cursive; font-size: 18px; color: var(--ink-soft); margin-bottom: 8px; border-bottom: 1px dashed var(--divider); padding-bottom: 6px;}
+.yao-table { width: 100%; border-collapse: collapse; }
+.yao-table tr { border-bottom: 1px solid rgba(139,106,26,0.1); }
+.yao-table tr:last-child { border-bottom: none; }
+
+/* ⬇️ 主要修改這行，將 padding 從 14px 降為 8px，line-height 從 2 降為 1.4 */
+.yao-table td { padding: 9px 0; vertical-align: top; font-size: 14px; line-height: 1.4; }
+
+.yao-table .yao-pos { width: 70px; font-family: 'Ma Shan Zheng', cursive; font-size: 18px; color: var(--gold); padding-right: 12px; }
+.yao-table .yao-text { color: var(--ink-soft); }
+
+/* ADVICE GRID */
+.advice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+.advice-card { padding: 20px; border: 1px solid var(--divider); position: relative; }
+.advice-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+.advice-card.ji::before { background: var(--gold); }
+.advice-card.xiong::before { background: var(--vermillion); }
+.advice-card-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; display: block; }
+.ji .advice-card-label { color: var(--gold); }
+.xiong .advice-card-label { color: var(--vermillion); }
+.advice-list { list-style: none; }
+.advice-list li { font-size: 13px; padding: 4px 0; color: var(--ink-soft); line-height: 2; display: flex; align-items: flex-start; gap: 6px; }
+.advice-list li::before { content: '• '; color: var(--gold); flex-shrink: 0; }
+.xiong .advice-list li::before { color: var(--vermillion); }
+.advice-list li [contenteditable] { flex: 1; }
+
+/* TEACHER NOTE & FOOTER */
+.teacher-note { background: var(--ink); color: var(--parchment); padding: 40px 48px; position: relative; margin: 0 24px 24px; }
+.teacher-note::before { content: '』'; position: absolute; top: 20px; right: 32px; font-family: 'Ma Shan Zheng', cursive; font-size: 80px; color: rgba(255,255,255,0.04); }
+.teacher-note-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 4px; color: var(--gold-pale); text-transform: uppercase; margin-bottom: 20px; display: block; }
+.teacher-note-text { font-size: 14px; line-height: 2.6; color: rgba(242,232,208,0.85); font-weight: 300; font-style: italic; max-width: 600px; }
+.teacher-sig { margin-top: 24px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.teacher-sig-name { font-family: 'Ma Shan Zheng', cursive; font-size: 22px; color: var(--gold-pale); }
+.teacher-sig-seal { width: 40px; height: 40px; border: 1px solid var(--seal-red); display: flex; align-items: center; justify-content: center; transform: rotate(-5deg); opacity: 0.8; }
+.teacher-sig-seal span { font-family: 'Ma Shan Zheng', cursive; font-size: 14px; color: var(--seal-red); writing-mode: vertical-rl; letter-spacing: 2px; }
+
+.report-footer { padding: 20px 56px; border-top: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02); }
+.footer-left { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 3px; color: var(--ink-faint); text-transform: uppercase; }
+.footer-center { font-family: 'Ma Shan Zheng', cursive; font-size: 20px; color: var(--gold); }
+.footer-right { font-size: 10px; color: var(--ink-faint); text-align: right; letter-spacing: 1px; }
+
+/* Editor Buttons */
+.add-row-btn { margin-top: 10px; background: transparent; border: 1px dashed rgba(184,134,11,0.4); color: var(--gold); padding: 6px 16px; font-size: 11px; font-family: 'Noto Serif TC', serif; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
+.add-row-btn:hover { background: rgba(184,134,11,0.08); }
+.del-row-btn { background: transparent; border: none; color: rgba(139,0,0,0.3); font-size: 10px; cursor: pointer; padding: 2px 6px; transition: color 0.2s; flex-shrink: 0; }
+.del-row-btn:hover { color: var(--vermillion); }
+
+@media print {
+  .toolbar, .editor-controls, .add-row-btn, .del-row-btn { display: none !important; }
+  html { background: white; }
+  .page-wrap { padding-top: 0; padding-bottom: 0; }
+  .page { margin: 0; box-shadow: none; max-width: 100%; }
+  [contenteditable] { background: transparent !important; box-shadow: none !important; }
+  select.field-select { background-image: none !important; padding-right: 0 !important; }
+}
+@media (max-width: 700px) {
+  .hex-display-grid { flex-direction: column; gap: 32px; }
+  .seal { position: static; transform: rotate(-8deg); margin: 0 auto 16px; }
+  .content-area { padding: 0 20px 40px; }
+  .advice-grid { grid-template-columns: 1fr; }
+  .meta-bar { grid-template-columns: 1fr 1fr; }
+  .teacher-note { padding: 28px 20px; margin: 0 12px 12px; }
+  .report-footer { flex-direction: column; gap: 10px; text-align: center; }
+  .editor-controls { flex-direction: column; gap: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="toolbar-logo">易問堂</span>
+  <span class="toolbar-label">解卦報告編輯器</span>
+  <span class="toolbar-sep"></span>
+  <span class="toolbar-hint">點擊任何文字即可編輯 ·</span>
+  <button class="btn-clear" onclick="clearAll()">清空重填</button>
+  <button class="btn-print" onclick="window.print()">列印 / 儲存 PDF</button>
+</div>
+
+<div class="editor-controls">
+  <div>
+    <label>卦象一：</label>
+    <select id="select-hex-1" onchange="updateHexagrams()"></select>
+  </div>
+  <div>
+    <label>卦象二：</label>
+    <select id="select-hex-2" onchange="updateHexagrams()">
+      <option value="">(無)</option>
+    </select>
+  </div>
+  <div>
+    <label>卦象三：</label>
+    <select id="select-hex-3" onchange="updateHexagrams()">
+      <option value="">(無)</option>
+    </select>
+  </div>
+</div>
+
+<div class="page-wrap">
+<div class="page"><div class="border-frame">
+  <div class="corner tl"><svg viewBox="0 0 32 32" fill="none"><path d="M2 2 L12 2 L2 12 Z" fill="rgba(139,106,26,0.3)"/><path d="M2 2 L20 2" stroke="rgba(139,106,26,0.5)" stroke-width="1"/><path d="M2 2 L2 20" stroke="rgba(139,106,26,0.5)" stroke-width="1"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 32 32" fill="none"><path d="M2 2 L12 2 L2 12 Z" fill="rgba(139,106,26,0.3)"/><path d="M2 2 L20 2" stroke="rgba(139,106,26,0.5)" stroke-width="1"/><path d="M2 2 L2 20" stroke="rgba(139,106,26,0.5)" stroke-width="1"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 32 32" fill="none"><path d="M2 2 L12 2 L2 12 Z" fill="rgba(139,106,26,0.3)"/><path d="M2 2 L20 2" stroke="rgba(139,106,26,0.5)" stroke-width="1"/><path d="M2 2 L2 20" stroke="rgba(139,106,26,0.5)" stroke-width="1"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 32 32" fill="none"><path d="M2 2 L12 2 L2 12 Z" fill="rgba(139,106,26,0.3)"/><path d="M2 2 L20 2" stroke="rgba(139,106,26,0.5)" stroke-width="1"/><path d="M2 2 L2 20" stroke="rgba(139,106,26,0.5)" stroke-width="1"/></svg></div>
+
+  <div class="report-header">
+    <span class="studio-name">易 問 堂</span>
+    <span class="report-title-en">I Ching Divination Report · Confidential</span>
+    <div class="header-divider"><span>☰ ☵ ☲ ☷</span></div>
+    <div style="font-family:'Ma Shan Zheng',cursive;font-size:36px;color:var(--ink);letter-spacing:8px;margin-top:4px;">易卦解析報告</div>
+  </div>
+
+  <div class="meta-bar">
+    <div class="meta-item">
+      <span class="meta-label">問卦代號</span>
+      <span class="meta-value" id="meta-id-top" contenteditable="true" data-ph="YWT-000000">YWT-000000</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">問卦日期</span>
+      <span class="meta-value" contenteditable="true" data-ph="年月日">2025年04月22日</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">問卦主題</span>
+      <select class="field-select meta-value">
+        <option>感情 · 婚姻</option><option>事業 · 工作</option><option>重大決策</option>
+        <option>健康</option><option>財運</option><option>家庭 · 人際</option><option>其他</option>
+      </select>
+    </div>
+   <div class="meta-item">
+      <span class="meta-label">起卦方式</span>
+      <select class="field-select meta-value">
+        <option selected>問事起卦</option>
+        <option>時間起卦</option>
+        <option>銅錢搖卦</option>
+        <option>生日起卦</option>
+        <option>梅花易數</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="hexagram-hero">
+    <div class="seal"><span class="seal-text">易問堂</span></div>
+    <div class="hex-display-grid" id="hex-hero-container">
+      </div>
+  </div>
+
+  <div class="content-area">
+    <div class="section-block">
+      <div class="section-head">
+        <div class="section-icon">問</div>
+        <div class="section-heading">
+          <span class="section-title-zh">您的問題</span>
+          <span class="section-title-en">Your Question</span>
+        </div>
+        <div class="section-rule"></div>
+      </div>
+      <div class="callout">
+        <span class="callout-label">問卦內容</span>
+        <p contenteditable="true" data-ph="貼上客戶的問題原文…">「請在此輸入您的問題...」</p>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-head">
+        <div class="section-icon">解</div>
+        <div class="section-heading">
+          <span class="section-title-zh">綜合解析</span>
+          <span class="section-title-en">General Interpretation</span>
+        </div>
+        <div class="section-rule"></div>
+      </div>
+      <div class="body-text">
+        <p contenteditable="true" data-ph="第一段：卦的背景與意涵…">請輸入綜合解析的內容...</p>
+        <p contenteditable="true" data-ph="第二段：深入解析…"></p>
+      </div>
+      <div class="callout" style="margin-top:24px;">
+        <span class="callout-label">核心卦義</span>
+        <p contenteditable="true" data-ph="一句話總結這卦對問題的核心提示…">請輸入核心總結...</p>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-head">
+        <div class="section-icon">爻</div>
+        <div class="section-heading">
+          <span class="section-title-zh">爻辭解析</span>
+          <span class="section-title-en">Line Readings</span>
+        </div>
+        <div class="section-rule"></div>
+      </div>
+      <div id="yao-readings-container">
+        </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-head">
+        <div class="section-icon">議</div>
+        <div class="section-heading">
+          <span class="section-title-zh">趨吉避凶建議</span>
+          <span class="section-title-en">Guidance & Recommendations</span>
+        </div>
+        <div class="section-rule"></div>
+      </div>
+      <div class="advice-grid">
+        <div class="advice-card ji">
+          <span class="advice-card-label">✦ 宜 · Auspicious Actions</span>
+          <ul class="advice-list" id="list-ji">
+            <li><span contenteditable="true">新增宜做事項...</span><button class="del-row-btn" onclick="delListItem(this)">✕</button></li>
+          </ul>
+          <button class="add-row-btn" onclick="addListItem('list-ji')">＋ 新增</button>
+        </div>
+        <div class="advice-card xiong">
+          <span class="advice-card-label">✧ 忌 · Cautionary Notes</span>
+          <ul class="advice-list" id="list-xiong">
+            <li><span contenteditable="true">新增忌諱事項...</span><button class="del-row-btn" onclick="delListItem(this)">✕</button></li>
+          </ul>
+          <button class="add-row-btn" onclick="addListItem('list-xiong')">＋ 新增</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="teacher-note">
+    <span class="teacher-note-label">Teacher's Note · 老師結語</span>
+    <p class="teacher-note-text" contenteditable="true" data-ph="寫下給這位客戶的個人化結語…">寫下個人化結語...</p>
+    <div class="teacher-sig">
+      <span class="teacher-sig-name" contenteditable="true">易問堂 謹識</span>
+      <div class="teacher-sig-seal"><span>易問堂</span></div>
+    </div>
+  </div>
+
+  <div class="report-footer">
+    <div class="footer-left">Yi Wen Tang · Confidential Report</div>
+    <div class="footer-center">易問堂</div>
+    <div class="footer-right">
+      問卦代號 <span id="meta-id-bottom" contenteditable="true" style="display:inline-block;min-width:6em;">YWT-000000</span><br>
+      本報告於 <span contenteditable="true" style="display:inline-block;min-width:8em;">2025.04.22</span> 出具
+    </div>
+  </div>
+
+</div></div></div>
+
+<script>
+/* ============================================================
+   DATA: 64 Hexagrams (範例建置 4 卦，可自行擴充其餘 60 卦)
+   1 代表陽爻(━━)，0 代表陰爻(─ ─)，陣列順序由上爻到初爻(Top to Bottom)
+============================================================ */
+const hexData = {
+  "乾為天": {
+    num: "一", lines: [1, 1, 1, 1, 1, 1],
+    guaci: "「元，亨，利，貞。」", source: "《周易·乾卦》",
+    yao: [
+      { pos: "上九", text: "亢龍，有悔。 —— 盈不可久，宜知進退之機。" },
+      { pos: "九五", text: "飛龍在天，利見大人。 —— 運勢鼎盛，大有作為。" },
+      { pos: "九四", text: "或躍在淵，無咎。 —— 審時度勢，進退皆宜。" },
+      { pos: "九三", text: "君子終日乾乾，夕惕若厲，無咎。 —— 勤勉戒慎，方能避險。" },
+      { pos: "九二", text: "見龍在田，利見大人。 —— 嶄露頭角，宜求貴人相助。" },
+      { pos: "初九", text: "潛龍，勿用。 —— 時機未到，宜韜光養晦。" }
+    ]
+  },
+  "坤為地": {
+    num: "二", lines: [0, 0, 0, 0, 0, 0],
+    guaci: "「元亨，利牝馬之貞。君子有攸往，先迷後得主，利。西南得朋，東北喪朋。安貞，吉。」", source: "《周易·坤卦》",
+    yao: [
+      { pos: "上六", text: "龍戰於野，其血玄黃。 —— 陰陽相爭，兩敗俱傷，不宜強出頭。" },
+      { pos: "六五", text: "黃裳，元吉。 —— 居中守正，謙和退讓，大吉。" },
+      { pos: "六四", text: "括囊，無咎無譽。 —— 謹言慎行，以求自保。" },
+      { pos: "六三", text: "含章可貞，或從王事，無成有終。 —— 隱藏才華，不居功，終有回報。" },
+      { pos: "六二", text: "直，方，大，不習無不利。 —— 品德端正，順應自然，無往不利。" },
+      { pos: "初六", text: "履霜，堅冰至。 —— 見微知著，防患於未然。" }
+    ]
+  },
+  "水火既濟": {
+    num: "六十三", lines: [0, 1, 0, 1, 0, 1],
+    guaci: "「亨小，利貞，初吉終亂。」", source: "《周易·既濟卦》",
+    yao: [
+      { pos: "上六", text: "濡其首，厲。 —— 過於執著往昔，易招困境，宜適時放下舊有執念。" },
+      { pos: "九五", text: "東鄰殺牛，不如西鄰之禴祭，實受其福。 —— 真心勝過形式，真誠的付出更為重要。" },
+      { pos: "六四", text: "繻有衣袽，終日戒。 —— 雖有小損耗，但保持警覺與用心，可守住根基。" },
+      { pos: "九三", text: "高宗伐鬼方，三年克之。 —— 事有難，需耐心與毅力，不可輕言放棄。" },
+      { pos: "六二", text: "婦喪其茀，勿逐，七日得。 —— 一時的失落不必過度追究，順其自然自會回歸正軌。" },
+      { pos: "初九", text: "曳其輪，濡其尾，無咎。 —— 起步雖緩，謹慎行事，無大礙。" }
+    ]
+  },
+  "水山蹇": {
+    num: "三十九", lines: [0, 1, 0, 1, 0, 0],
+    guaci: "「利西南，不利東北；利見大人；貞吉。」", source: "《周易·蹇卦》",
+    yao: [
+      { pos: "上六", text: "往蹇，來碩，吉，利見大人。 —— 歷經艱險終迎來豐碩成果，宜求教長輩貴人。" },
+      { pos: "九五", text: "大蹇，朋來。 —— 遭遇大難，但會有志同道合的朋友前來相助。" },
+      { pos: "六四", text: "往蹇，來連。 —— 前行受阻，宜退回與同伴聯合，不可孤軍奮戰。" },
+      { pos: "九三", text: "往蹇，來反。 —— 前路艱險，適時回頭反省才是明智之舉。" },
+      { pos: "六二", text: "王臣蹇蹇，匪躬之故。 —— 為了大局而甘冒艱險，精神可嘉。" },
+      { pos: "初六", text: "往蹇，來譽。 —— 知道前路艱難而適時停止，能獲得讚譽。" }
+    ]
+  }
+  // ... 其他 60 卦資料請依此格式補齊
+};
+
+// Populate Select Options
+function initSelects() {
+  const hexNames = Object.keys(hexData);
+  const selects = ['select-hex-1', 'select-hex-2', 'select-hex-3'].map(id => document.getElementById(id));
+  
+  selects.forEach((sel, index) => {
+    if (index === 0) sel.innerHTML = ''; // 第一個必選，不加(無)
+    hexNames.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  });
+
+  // Default selection
+  document.getElementById('select-hex-1').value = '水火既濟';
+}
+
+// Generate Lines HTML
+function getHexLinesHTML(linesArray) {
+  let html = '';
+  linesArray.forEach(val => {
+    if (val === 1) {
+      html += `<div class="hex-line-row yang"><div class="hex-line-seg"></div></div>`;
+    } else {
+      html += `<div class="hex-line-row yin"><div class="hex-line-seg"></div><div class="hex-line-seg"></div></div>`;
+    }
+  });
+  return html;
+}
+
+// Update the entire view based on selections
+function updateHexagrams() {
+  const sel1 = document.getElementById('select-hex-1').value;
+  const sel2 = document.getElementById('select-hex-2').value;
+  const sel3 = document.getElementById('select-hex-3').value;
+  const selections = [sel1, sel2, sel3].filter(v => v !== "");
+
+  const heroContainer = document.getElementById('hex-hero-container');
+  const yaoContainer = document.getElementById('yao-readings-container');
+  
+  heroContainer.innerHTML = '';
+  yaoContainer.innerHTML = '';
+
+  const labels = ['本卦', '互卦', '變卦']; // 可依照你的習慣命名
+
+  selections.forEach((hexName, idx) => {
+    const data = hexData[hexName];
+    if(!data) return;
+
+    // 1. Build Hero Card
+    const card = document.createElement('div');
+    card.className = 'hex-card';
+    card.innerHTML = `
+      <div class="hexagram-visual">
+        <div class="hex-lines-group">${getHexLinesHTML(data.lines)}</div>
+        <div class="hex-number">第 <span>${data.num}</span> 卦</div>
+      </div>
+      <div class="hexagram-name-block">
+        <span class="hex-card-label">HEXAGRAM · ${labels[idx] || `卦象${idx+1}`}</span>
+        <span class="hex-name-zh" contenteditable="true">${hexName}</span>
+        <blockquote class="hex-guaci">
+          <span contenteditable="true">${data.guaci}</span>
+          <span class="source" contenteditable="true">— ${data.source}</span>
+        </blockquote>
+      </div>
+    `;
+    heroContainer.appendChild(card);
+
+    // 2. Build Yao Tables
+    let yaoRowsHtml = '';
+    data.yao.forEach(y => {
+      // 擷取爻位與原文解析 (假設資料格式是 "爻位：內文")
+      let pos = y.pos;
+      let text = y.text;
+      
+      yaoRowsHtml += `
+        <tr>
+          <td class="yao-pos"><span contenteditable="true">${pos}</span></td>
+          <td class="yao-text"><span contenteditable="true">${text}</span></td>
+        </tr>
+      `;
+    });
+
+    const yaoGroup = document.createElement('div');
+    yaoGroup.className = 'yao-group';
+    yaoGroup.innerHTML = `
+      <div class="yao-group-title">【${hexName}】</div>
+      <table class="yao-table">
+        ${yaoRowsHtml}
+      </table>
+    `;
+    yaoContainer.appendChild(yaoGroup);
+  });
+}
+
+// Sync Meta ID top to bottom
+document.getElementById('meta-id-top').addEventListener('input', function() {
+  document.getElementById('meta-id-bottom').textContent = this.textContent;
+});
+document.getElementById('meta-id-bottom').addEventListener('input', function() {
+  document.getElementById('meta-id-top').textContent = this.textContent;
+});
+
+/* ── Advice lists ── */
+function addListItem(listId) {
+  const ul = document.getElementById(listId);
+  const li = document.createElement('li');
+  li.innerHTML = `<span contenteditable="true" data-ph="輸入建議…">新增建議</span><button class="del-row-btn" onclick="delListItem(this)">✕</button>`;
+  ul.appendChild(li);
+  li.querySelector('[contenteditable]').focus();
+}
+function delListItem(btn) { btn.closest('li').remove(); }
+
+/* ── Clear all ── */
+function clearAll() {
+  if (!confirm('確定要清空所有內容重新填寫嗎？')) return;
+  document.querySelectorAll('.callout p, .body-text p, .teacher-note-text, #list-ji span, #list-xiong span').forEach(el => {
+    el.textContent = '';
+  });
+}
+
+// Run on load
+initSelects();
+updateHexagrams();
+</script>
+</body>
+</html>
