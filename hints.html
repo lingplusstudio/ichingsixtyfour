@@ -227,7 +227,7 @@
     <div id="tipCard" class="tip-card">
       <div class="sec-block">
         <div class="sec-label"> 說文解字 </div>
-        <div id="displayImage" class="tip-content highlight"></div>
+        <div id="displayExplain" class="tip-content highlight"></div>
       </div>
       <div class="sec-block">
         <div class="sec-label">🎥 物理畫面與自然意象</div>
@@ -256,11 +256,13 @@
       const tips = hexagramTips[selectedGua]; // 從資料庫抓資料
 
       if (tips) {
+         document.getElementById('displayExplain').innerText = tips.image;
         document.getElementById('displayImage').innerText = tips.image;
         document.getElementById('displayStrategy').innerText = tips.strategy;
         document.getElementById('displayPsychology').innerText = tips.psychology;
         tipCard.style.display = 'block'; // 顯示卡片
       } else {
+        document.getElementById('displayExplain').innerText = "提示建置中...";
         document.getElementById('displayImage').innerText = "提示建置中...";
         document.getElementById('displayStrategy').innerText = "提示建置中...";
         document.getElementById('displayPsychology').innerText = "提示建置中...";
