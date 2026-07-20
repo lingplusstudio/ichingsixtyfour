@@ -226,8 +226,12 @@
 
     <div id="tipCard" class="tip-card">
       <div class="sec-block">
-        <div class="sec-label"> 說文解字 </div>
+        <div class="sec-label">🅰️ 說文解字 </div>
         <div id="displayExplain" class="tip-content highlight"></div>
+      </div>
+       <div class="sec-block">
+        <div class="sec-label">⏱️ 時間感&節奏建議 </div>
+        <div id="displayTiming" class="tip-content highlight"></div>
       </div>
       <div class="sec-block">
         <div class="sec-label">🎥 物理畫面與自然意象</div>
@@ -256,13 +260,15 @@
       const tips = hexagramTips[selectedGua]; // 從資料庫抓資料
 
       if (tips) {
-         document.getElementById('displayExplain').innerText = tips.explain;
+        document.getElementById('displayExplain').innerText = tips.explain;
+        document.getElementById('displayTiming').innerText = tips.Timing;
         document.getElementById('displayImage').innerText = tips.image;
         document.getElementById('displayStrategy').innerText = tips.strategy;
         document.getElementById('displayPsychology').innerText = tips.psychology;
         tipCard.style.display = 'block'; // 顯示卡片
       } else {
         document.getElementById('displayExplain').innerText = "提示建置中...";
+        document.getElementById('displayTiming').innerText = "提示建置中...";
         document.getElementById('displayImage').innerText = "提示建置中...";
         document.getElementById('displayStrategy').innerText = "提示建置中...";
         document.getElementById('displayPsychology').innerText = "提示建置中...";
