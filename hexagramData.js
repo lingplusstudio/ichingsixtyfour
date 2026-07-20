@@ -1,6 +1,7 @@
 // hexagramData.js
 const hexagramTips = {
   "第1卦 乾為天": {
+    explain: "TEST",
     image: "六陽純健，天行不息",
     strategy: "自強不息、見機行事、知進退",
     psychology: "絕對自信、純粹的動能、避免過度亢奮與燒腦"
